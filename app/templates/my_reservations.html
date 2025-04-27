@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}My Reservations{% endblock %}
+
+{% block content %}
+<h2>My Reservations</h2>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Reservation Date</th>
+            <th>Patient Name</th>
+            <th>Tracking Code</th>
+            <th>Image</th> <!-- New column -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for reservation in reservations %}
+        <tr>
+            <td>{{ reservation.reservation_date }}</td>
+            <td>{{ reservation.patient_name }}</td>
+            <td>{{ reservation.tracking_code }}</td>
+            <td>
+                {% if reservation.uploaded_image_path %}
+                    <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}" target="_blank">
+                        {{ reservation.uploaded_image_path }}
+                    </a>
+                {% else %}
+                    No Image
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('main.reserve') }}">Make New Reservation</a>
+{% endblock %}

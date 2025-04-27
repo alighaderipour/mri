@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}All MRI Reservations{% endblock %}
+
+{% block content %}
+<h2>All MRI Reservations</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Reservation Date</th>
+            <th>Applicant Name</th>
+            <th>Patient Name</th>
+            <th>Tracking Code</th>
+            <th>Image</th>
+            <th>Turn Date</th>
+            <th>Assign Turn</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reservation in reservations %}
+        <tr>
+            <td>{{ reservation.reservation_date }}</td>
+            <td>{{ reservation.application_first_name }} {{ reservation.application_last_name }}</td>
+            <td>{{ reservation.patient_name }}</td>
+            <td>{{ reservation.tracking_code }}</td>
+            <td>
+                {% if reservation.uploaded_image_path %}
+                    <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}" target="_blank">
+                        {{ reservation.uploaded_image_path }}
+                    </a>
+                {% else %}
+                    No Image
+                {% endif %}
+            </td>
+            <td>{{ reservation.turn_date or 'N/A' }} {{ reservation.turn_hour or '' }}</td>
+            <td>
+                <form action="{{ url_for('admin.assign_turn', req_id=reservation.id) }}" method="POST">
+                    <input type="date" name="turn_date" required>
+                    <input type="text" name="turn_hour" class="timepicker" required>
+
+                    <button type="submit">Assign</button>
+                </form>
+            </td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

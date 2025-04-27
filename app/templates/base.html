@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}My App{% endblock %}</title>
+    <style>
+        nav a {
+            margin-right: 10px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="{{ url_for('main.reserve') }}">New Reservation</a>
+    <a href="{{ url_for('main.my_reservations') }}">My Reservations</a>
+    {% if current_user.is_authenticated %}
+    {% if current_user.is_admin %}
+        <a href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
+        <a href="{{ url_for('admin.list_users') }}">User List</a>
+        <a href="{{ url_for('admin.view_reservations') }}">All Reservations</a>
+    {% elif current_user.can_assign_turn %}
+        <a href="{{ url_for('admin.view_reservations') }}">All Reservations</a>
+    {% endif %}
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+{% endif %}
+
+</nav>
+
+<hr>
+
+{% block content %}
+{% endblock %}
+
+</body>
+</html>

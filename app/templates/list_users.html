@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}All Users{% endblock %}
+
+{% block content %}
+<h2>All Users</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>National Code</th>
+            <th>Phone Number</th>
+            <th>Section</th>
+            <th>Is Admin</th>
+            <th>Can Assign Turn</th>
+            <th>Is Active</th>
+            <th>Edit</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <form action="{{ url_for('admin.edit_user', user_id=user.id) }}" method="POST">
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td><input type="text" name="password" value="{{ user.password }}"></td>
+                <td><input type="text" name="first_name" value="{{ user.first_name }}"></td>
+                <td><input type="text" name="last_name" value="{{ user.last_name }}"></td>
+                <td><input type="text" name="national_code" value="{{ user.national_code }}"></td>
+                <td><input type="text" name="phone_number" value="{{ user.phone_number }}"></td>
+                <td><input type="text" name="section" value="{{ user.section }}"></td>
+                <td><input type="checkbox" name="is_admin" {% if user.is_admin %}checked{% endif %}></td>
+                <td><input type="checkbox" name="can_assign_turn" {% if user.can_assign_turn %}checked{% endif %}></td>
+                <td><input type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %}></td>
+                <td><button type="submit">Save</button></td>
+            </form>
+
+        </tr>
+        {% endfor %}
+
+    </tbody>
+</table>
+    <a href="{{ url_for('admin.create_user') }}">Create New User</a>
+{% endblock %}

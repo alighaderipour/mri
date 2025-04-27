@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Edit User{% endblock %}
+
+{% block content %}
+<h2>Edit User</h2>
+
+<form method="POST">
+    <label>New Password:</label>
+    <input type="password" name="password"><br>
+
+    <label>First Name:</label>
+    <input type="text" name="first_name" value="{{ user.first_name }}" required><br>
+
+    <label>Last Name:</label>
+    <input type="text" name="last_name" value="{{ user.last_name }}" required><br>
+
+    <label>National Code:</label>
+    <input type="text" name="national_code" value="{{ user.national_id }}" required><br>
+
+    <label>Phone Number:</label>
+    <input type="text" name="phone_number" value="{{ user.phone_number }}" required><br>
+
+    <label>Is Admin:</label>
+    <input type="checkbox" name="is_admin" {% if user.is_admin %}checked{% endif %}><br>
+
+    <label>Can Assign Turn:</label>
+    <input type="checkbox" name="can_assign_turn" {% if user.can_assign_turn %}checked{% endif %}><br>
+
+    <label>Is Active:</label>
+    <input type="checkbox" name="is_active" {% if user.is_active %}checked{% endif %}><br>
+
+    <button type="submit">Save Changes</button>
+</form>
+{% endblock %}

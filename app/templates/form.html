@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Reservation Form{% endblock %}
+
+{% block content %}
+<h2>Reservation Form</h2>
+
+<form method="post" enctype="multipart/form-data" id="reservationForm">
+    <label>Reservation Date:</label>
+    <input type="text" name="reservation_date" value="{{ today }}" readonly><br>
+
+    <label>Applicant National ID:</label>
+    <input type="text" name="applicant_national_id" value="{{ user.national_code }}" readonly><br>
+
+    <label>First Name:</label>
+    <input type="text" name="application_first_name" value="{{ user.first_name }}" readonly><br>
+
+    <label>Last Name:</label>
+    <input type="text" name="application_last_name" value="{{ user.last_name }}" readonly><br>
+
+    <label>Phone Number:</label>
+    <input type="text" name="application_phone_number" value="{{ user.phone_number }}" readonly><br>
+
+    <label>Section:</label>
+    <input type="text" name="application_section" value="{{ user.section }}" readonly><br>
+
+    <label>Patient Name:</label>
+    <input type="text" name="patient_name" required><br>
+
+    <label>Patient Phone Number:</label>
+    <input type="text" name="patient_phone_number" required><br>
+
+    <label>Patient Insurance:</label>
+    <select name="patient_insurance_name" id="insuranceSelect" required>
+        {% for insurance in insurances %}
+            <option value="{{ insurance.name }}" data-image-required="{{ 1 if insurance.image_required else 0 }}"
+            {% if insurance.name == 'ساير' %}selected{% endif %}>
+                {{ insurance.name }}
+            </option>
+        {% endfor %}
+    </select><br>
+
+    <div id="imageUploadDiv" style="display: none;">
+        <label>Upload Image:</label>
+        <input type="file" name="uploaded_image" id="uploadedImageInput" accept="image/*"><br>
+    </div>
+
+    <label>Tracking Code:</label>
+    <input type="text" name="tracking_code" required><br>
+
+    <label>Explanation:</label>
+    <input type="text" name="explanation" required><br>
+
+    <button type="submit">Submit</button>
+</form>
+
+<a href="{{ url_for('auth.logout') }}">Logout</a>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul>
+            {% for msg in messages %}
+                <li>{{ msg }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+<script>
+// JavaScript to show/hide image upload field
+document.addEventListener('DOMContentLoaded', function() {
+    const insuranceSelect = document.getElementById('insuranceSelect');
+    const imageUploadDiv = document.getElementById('imageUploadDiv');
+    const uploadedImageInput = document.getElementById('uploadedImageInput');
+
+    function toggleImageUpload() {
+        const selectedOption = insuranceSelect.options[insuranceSelect.selectedIndex];
+        const imageRequired = selectedOption.getAttribute('data-image-required');
+
+        if (imageRequired === '1') {
+            imageUploadDiv.style.display = 'block';
+            uploadedImageInput.required = true;
+        } else {
+            imageUploadDiv.style.display = 'none';
+            uploadedImageInput.required = false;
+            uploadedImageInput.value = ""; // clear any selected file
+        }
+    }
+
+    // Initial check on page load
+    toggleImageUpload();
+
+    // Listen for changes
+    insuranceSelect.addEventListener('change', toggleImageUpload);
+});
+</script>
+
+{% endblock %}
