@@ -58,6 +58,12 @@ class MRIRequest(db.Model):
             return jdatetime.date.fromgregorian(date=self.turn_date).strftime('%Y/%m/%d')
         return None
 
+    @property
+    def my_reservation_date_persian(self):
+        if self.reservation_date:
+            g_date = self.reservation_date
+            return jdatetime.date.fromgregorian(date=g_date).strftime('%Y/%m/%d')
+        return None
 class Insurance(db.Model):
     __tablename__ = 'insurances'
 

@@ -76,5 +76,27 @@ def reserve():
 @main_bp.route('/my_reservations')
 @login_required
 def my_reservations():
-    user_reservations = MRIRequest.query.filter_by(user_id=current_user.id).all()
-    return render_template('my_reservations.html', reservations=user_reservations)
+    query = MRIRequest.query.filter_by(user_id=current_user.id)
+
+    reservation_date_persian = request.args.get('reservation_date')
+    turn_assigned = request.args.get('turn_assigned')
+
+    if reservation_date_persian:
+        try:
+            # تبدیل تاریخ شمسی به میلادی
+            parts = reservation_date_persian.split('/')
+            if len(parts) == 3:
+                jy, jm, jd = map(int, parts)
+                g_date = jdatetime.date(jy, jm, jd).togregorian()
+                query = query.filter(MRIRequest.reservation_date == g_date)
+        except Exception as e:
+            flash(f"Invalid Persian date format: {e}")
+
+    if turn_assigned == 'yes':
+        query = query.filter(MRIRequest.turn_date.isnot(None))
+    elif turn_assigned == 'no':
+        query = query.filter(MRIRequest.turn_date.is_(None))
+
+    reservations = query.order_by(MRIRequest.reservation_date.desc()).all()
+
+    return render_template('my_reservations.html', reservations=reservations)

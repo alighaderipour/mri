@@ -5,34 +5,56 @@
 {% block content %}
 <h2>My Reservations</h2>
 
+<!-- Filter Section -->
+<form method="get" action="{{ url_for('main.my_reservations') }}">
+    <label for="reservation_date">Reservation Date (Persian):</label>
+    <input type="text" id="reservation_date" name="reservation_date" value="{{ request.args.get('reservation_date', '') }}" placeholder="مثلا 1403/02/09">
+
+    <label for="turn_assigned">Turn Assigned:</label>
+    <select id="turn_assigned" name="turn_assigned">
+        <option value="">All</option>
+        <option value="yes" {% if request.args.get('turn_assigned') == 'yes' %}selected{% endif %}>Assigned</option>
+        <option value="no" {% if request.args.get('turn_assigned') == 'no' %}selected{% endif %}>Pending</option>
+    </select>
+
+    <button type="submit">Filter</button>
+</form>
+
+<br>
+
 <table border="1">
     <thead>
         <tr>
             <th>Reservation Date</th>
             <th>Patient Name</th>
             <th>Tracking Code</th>
-            <th>Image</th> <!-- New column -->
+            <th>Turn Date</th>
+            <th>Turn Hour</th>
         </tr>
     </thead>
     <tbody>
-        {% for reservation in reservations %}
+    {% for reservation in reservations %}
         <tr>
-            <td>{{ reservation.reservation_date_persian }}</td> <!-- changed -->
+            <td>{{ reservation.reservation_date_persian or 'N/A' }}</td>
             <td>{{ reservation.patient_name }}</td>
             <td>{{ reservation.tracking_code }}</td>
             <td>
-                {% if reservation.uploaded_image_path %}
-                    <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}" target="_blank">
-                        {{ reservation.uploaded_image_path }}
-                    </a>
+                {% if reservation.turn_date %}
+                    {{ reservation.turn_date }}
                 {% else %}
-                    No Image
+                    Pending
+                {% endif %}
+            </td>
+            <td>
+                {% if reservation.turn_hour %}
+                    {{ reservation.turn_hour }}
+                {% else %}
+                    Pending
                 {% endif %}
             </td>
         </tr>
-        {% endfor %}
+    {% endfor %}
     </tbody>
 </table>
 
-<a href="{{ url_for('main.reserve') }}">Make New Reservation</a>
 {% endblock %}
