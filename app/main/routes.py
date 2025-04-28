@@ -11,6 +11,10 @@ main_bp = Blueprint('main', __name__)
 # Route to serve images from the /images directory
 @main_bp.route('/images/<filename>')
 def serve_image(filename):
+    image_path = os.path.join(current_app.root_path, 'images', filename)
+    if not os.path.exists(image_path):
+        # اگر فایل نبود، یه صفحه HTML زیبا نشون بده
+        return render_template('404_image.html'), 404
     return send_from_directory(os.path.join(current_app.root_path, 'images'), filename)
 
 @main_bp.route('/', methods=['GET', 'POST'])
