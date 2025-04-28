@@ -100,3 +100,4 @@ def my_reservations():
     reservations = query.order_by(MRIRequest.reservation_date.desc()).all()
 
     return render_template('my_reservations.html', reservations=reservations)
+

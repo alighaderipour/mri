@@ -28,6 +28,7 @@
             <th>Reservation Date</th>
             <th>Patient Name</th>
             <th>Tracking Code</th>
+            <th>Uploaded Image</th>
             <th>Turn Date</th>
             <th>Turn Hour</th>
         </tr>
@@ -38,6 +39,13 @@
             <td>{{ reservation.reservation_date_persian or 'N/A' }}</td>
             <td>{{ reservation.patient_name }}</td>
             <td>{{ reservation.tracking_code }}</td>
+            <td>
+    {% if reservation.uploaded_image_path %}
+        <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}" target="_blank">View Image</a>
+    {% else %}
+        No Image
+    {% endif %}
+</td>
             <td>
                 {% if reservation.turn_date %}
                     {{ reservation.turn_date }}
