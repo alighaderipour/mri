@@ -5,6 +5,7 @@ from app import db
 import re
 import persian
 import jdatetime
+from sqlalchemy import or_, and_
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 # --- Decorators ---
@@ -141,8 +142,39 @@ def edit_user(user_id):
 @login_required
 @can_assign_required
 def view_reservations():
-    all_reservations = MRIRequest.query.all()
-    return render_template('reservations_list.html', reservations=all_reservations)
+    filter_status = request.args.get('filter')
+    search_query = request.args.get('q')
+
+    query = MRIRequest.query
+
+    # --- Search ---
+    if search_query:
+        search = f"%{search_query}%"
+        query = query.filter(
+            or_(
+                MRIRequest.patient_name.ilike(search),
+                MRIRequest.application_first_name.ilike(search),
+                MRIRequest.application_last_name.ilike(search),
+                MRIRequest.tracking_code.ilike(search)
+            )
+        )
+
+    # --- Filter ---
+    if filter_status == 'assigned':
+        query = query.filter(
+            MRIRequest.turn_date.isnot(None),
+            MRIRequest.turn_hour.isnot(None)
+        )
+    elif filter_status == 'unassigned':
+        query = query.filter(
+            or_(
+                MRIRequest.turn_date.is_(None),
+                MRIRequest.turn_hour.is_(None)
+            )
+        )
+
+    reservations = query.all()
+    return render_template('reservations_list.html', reservations=reservations)
 
 @admin_bp.route('/assign_turn/<int:req_id>', methods=['POST'])
 @login_required
