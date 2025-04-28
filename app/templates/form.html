@@ -3,68 +3,94 @@
 {% block title %}Reservation Form{% endblock %}
 
 {% block content %}
-<h2>Reservation Form</h2>
+<div class="container mt-4">
+    <h2 class="mb-4">New MRI Reservation</h2>
 
-<form method="post" enctype="multipart/form-data" id="reservationForm">
-    <label>Reservation Date:</label>
-    <input type="text" name="reservation_date" value="{{ today }}" readonly><br>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-info">
+                {% for msg in messages %}
+                    <div>{{ msg }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
 
-    <label>Applicant National ID:</label>
-    <input type="text" name="applicant_national_id" value="{{ user.national_code }}" readonly><br>
+    <form method="post" enctype="multipart/form-data" id="reservationForm" class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Reservation Date</label>
+            <input type="text" class="form-control" name="reservation_date" value="{{ today }}" readonly>
+        </div>
 
-    <label>First Name:</label>
-    <input type="text" name="application_first_name" value="{{ user.first_name }}" readonly><br>
+        <div class="col-md-6">
+            <label class="form-label">Applicant National ID</label>
+            <input type="text" class="form-control" name="applicant_national_id" value="{{ user.national_code }}" readonly>
+        </div>
 
-    <label>Last Name:</label>
-    <input type="text" name="application_last_name" value="{{ user.last_name }}" readonly><br>
+        <div class="col-md-6">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-control" name="application_first_name" value="{{ user.first_name }}" readonly>
+        </div>
 
-    <label>Phone Number:</label>
-    <input type="text" name="application_phone_number" value="{{ user.phone_number }}" readonly><br>
+        <div class="col-md-6">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-control" name="application_last_name" value="{{ user.last_name }}" readonly>
+        </div>
 
-    <label>Section:</label>
-    <input type="text" name="application_section" value="{{ user.section }}" readonly><br>
+        <div class="col-md-6">
+            <label class="form-label">Phone Number</label>
+            <input type="text" class="form-control" name="application_phone_number" value="{{ user.phone_number }}" readonly>
+        </div>
 
-    <label>Patient Name:</label>
-    <input type="text" name="patient_name" required><br>
+        <div class="col-md-6">
+            <label class="form-label">Section</label>
+            <input type="text" class="form-control" name="application_section" value="{{ user.section }}" readonly>
+        </div>
 
-    <label>Patient Phone Number:</label>
-    <input type="text" name="patient_phone_number" required><br>
+        <hr class="mt-4">
 
-    <label>Patient Insurance:</label>
-    <select name="patient_insurance_name" id="insuranceSelect" required>
-        {% for insurance in insurances %}
-            <option value="{{ insurance.name }}" data-image-required="{{ 1 if insurance.image_required else 0 }}"
-            {% if insurance.name == 'ساير' %}selected{% endif %}>
-                {{ insurance.name }}
-            </option>
-        {% endfor %}
-    </select><br>
+        <div class="col-md-6">
+            <label class="form-label">Patient Name</label>
+            <input type="text" class="form-control" name="patient_name" required>
+        </div>
 
-    <div id="imageUploadDiv" style="display: none;">
-        <label>Upload Image:</label>
-        <input type="file" name="uploaded_image" id="uploadedImageInput" accept="image/*"><br>
-    </div>
+        <div class="col-md-6">
+            <label class="form-label">Patient Phone Number</label>
+            <input type="text" class="form-control" name="patient_phone_number" required>
+        </div>
 
-    <label>Tracking Code:</label>
-    <input type="text" name="tracking_code" required><br>
+        <div class="col-md-6">
+            <label class="form-label">Patient Insurance</label>
+            <select class="form-select" name="patient_insurance_name" id="insuranceSelect" required>
+                {% for insurance in insurances %}
+                    <option value="{{ insurance.name }}" data-image-required="{{ 1 if insurance.image_required else 0 }}"
+                    {% if insurance.name == 'ساير' %}selected{% endif %}>
+                        {{ insurance.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
 
-    <label>Explanation:</label>
-    <input type="text" name="explanation" required><br>
+        <div class="col-md-6" id="imageUploadDiv" style="display: none;">
+            <label class="form-label">Upload Insurance Image</label>
+            <input type="file" class="form-control" name="uploaded_image" id="uploadedImageInput" accept="image/*">
+        </div>
 
-    <button type="submit">Submit</button>
-</form>
+        <div class="col-md-6">
+            <label class="form-label">Tracking Code</label>
+            <input type="text" class="form-control" name="tracking_code" required>
+        </div>
 
-<a href="{{ url_for('auth.logout') }}">Logout</a>
+        <div class="col-md-12">
+            <label class="form-label">Explanation</label>
+            <input type="text" class="form-control" name="explanation" required>
+        </div>
 
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <ul>
-            {% for msg in messages %}
-                <li>{{ msg }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-{% endwith %}
+        <div class="col-12 mt-4">
+            <button type="submit" class="btn btn-primary">Submit Reservation</button>
+        </div>
+    </form>
+</div>
 
 <script>
 // JavaScript to show/hide image upload field
@@ -87,12 +113,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Initial check on page load
-    toggleImageUpload();
+    toggleImageUpload(); // Initial check
 
-    // Listen for changes
     insuranceSelect.addEventListener('change', toggleImageUpload);
 });
 </script>
-
 {% endblock %}

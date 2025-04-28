@@ -1,11 +1,15 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, send_from_directory, current_app
 from flask_login import login_required, current_user
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from app.models import MRIRequest, Insurance
 from app import db
 from datetime import date
 import os
 import uuid
-import jdatetime  # ADD THIS
+import jdatetime
+from app.forms import ProfileForm
+# ADD THIS
 main_bp = Blueprint('main', __name__)
 
 # Route to serve images from the /images directory
@@ -105,3 +109,47 @@ def my_reservations():
 
     return render_template('my_reservations.html', reservations=reservations)
 
+@main_bp.route('/user_profile', methods=['GET', 'POST'])
+@login_required
+def user_profile():
+    form = ProfileForm()
+
+    if form.validate_on_submit():
+        updated = False
+
+        # Update National Code
+        if form.national_code.data != current_user.national_code:
+            current_user.national_code = form.national_code.data
+            updated = True
+
+        # Update Password ONLY if user entered something
+        if form.current_password.data or form.new_password.data or form.confirm_new_password.data:
+            if not form.current_password.data or not form.new_password.data or not form.confirm_new_password.data:
+                flash('To change password, please fill all password fields.', 'error')
+                return redirect(url_for('main.user_profile'))
+
+            if form.new_password.data != form.confirm_new_password.data:
+                flash('New password and confirmation do not match.', 'error')
+                return redirect(url_for('main.user_profile'))
+
+            if check_password_hash(current_user.password_hash, form.current_password.data):
+                current_user.password_hash = generate_password_hash(form.new_password.data)
+                flash('Password updated successfully.', 'success')
+                updated = True
+            else:
+                flash('Current password is incorrect.', 'error')
+                return redirect(url_for('main.user_profile'))
+
+        if updated:
+            db.session.commit()
+            flash('Profile updated successfully.', 'success')
+        else:
+            flash('No changes detected.', 'info')
+
+        return redirect(url_for('main.user_profile'))
+
+    # Pre-fill national code
+    if request.method == 'GET':
+        form.national_code.data = current_user.national_code
+
+    return render_template('user_profile.html', form=form)
