@@ -37,7 +37,7 @@
 
             <td>
                 <form action="{{ url_for('admin.assign_turn', req_id=reservation.id) }}" method="POST">
-                    <input type="date" name="turn_date" required>
+                    <input type="text" name="turn_date" class="persian-datepicker" required autocomplete="off">
                     <input type="text" name="turn_hour" class="timepicker" required>
 
                     <button type="submit">Assign</button>
