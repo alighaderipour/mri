@@ -17,7 +17,7 @@
     <tbody>
         {% for reservation in reservations %}
         <tr>
-            <td>{{ reservation.reservation_date }}</td>
+            <td>{{ reservation.reservation_date_persian }}</td> <!-- changed -->
             <td>{{ reservation.patient_name }}</td>
             <td>{{ reservation.tracking_code }}</td>
             <td>

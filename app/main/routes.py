@@ -5,7 +5,7 @@ from app import db
 from datetime import date
 import os
 import uuid
-
+import jdatetime  # ADD THIS
 main_bp = Blueprint('main', __name__)
 
 # Route to serve images from the /images directory
@@ -17,14 +17,15 @@ def serve_image(filename):
 @login_required
 def reserve():
     insurances = Insurance.query.all()
-    today = date.today()
-
+    today_gregorian = date.today()
+    # Persian today
+    today_persian = jdatetime.date.today().strftime('%Y/%m/%d')  # Format nicely like 1403/02/08
     if request.method == 'POST':
         data = request.form
 
         existing = MRIRequest.query.filter_by(
             applicant_national_id=data['applicant_national_id'],
-            reservation_date=today
+            reservation_date=today_gregorian
         ).first()
 
         if existing:
@@ -48,7 +49,7 @@ def reserve():
             image_path = relative_path
 
         new_request = MRIRequest(
-            reservation_date=today,
+            reservation_date=today_gregorian,
             applicant_national_id=data['applicant_national_id'],
             application_first_name=data['application_first_name'],
             application_last_name=data['application_last_name'],
@@ -70,7 +71,7 @@ def reserve():
         return redirect(url_for('main.reserve'))
 
     user_data = current_user
-    return render_template('form.html', user=user_data, today=today, insurances=insurances)
+    return render_template('form.html', user=user_data, today=today_persian, insurances=insurances)
 
 @main_bp.route('/my_reservations')
 @login_required

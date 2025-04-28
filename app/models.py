@@ -3,7 +3,7 @@ from datetime import datetime
 from app import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-
+import jdatetime
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -46,7 +46,17 @@ class MRIRequest(db.Model):
     turn_hour = db.Column(db.Time, nullable=True)
     uploaded_image_path = db.Column(db.String(255), nullable=True)  # Storing raw image data
 
+    @property
+    def reservation_date_persian(self):
+        if self.reservation_date:
+            return jdatetime.date.fromgregorian(date=self.reservation_date).strftime('%Y/%m/%d')
+        return None
 
+    @property
+    def turn_date_persian(self):
+        if self.turn_date:
+            return jdatetime.date.fromgregorian(date=self.turn_date).strftime('%Y/%m/%d')
+        return None
 
 class Insurance(db.Model):
     __tablename__ = 'insurances'
