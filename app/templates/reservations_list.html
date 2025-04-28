@@ -3,21 +3,146 @@
 {% block title %}All MRI Reservations{% endblock %}
 
 {% block content %}
-<h2>All MRI Reservations</h2>
-<h3>Search and Filter Reservations</h3>
-<form method="get" action="{{ url_for('admin.view_reservations') }}">
-    <input type="text" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}">
+<style>
+/* Form styling */
+form.search-form {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
 
+form.search-form input[type="text"],
+form.search-form select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    min-width: 180px;
+}
+
+form.search-form button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form.search-form button:hover {
+    background-color: #45a049;
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+thead {
+    background-color: #f2f2f2;
+}
+
+thead th {
+    padding: 12px;
+    text-align: left;
+    font-weight: bold;
+    border-bottom: 2px solid #ddd;
+}
+
+tbody td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Button inside table */
+td form.assign-form {
+    display: flex;
+    gap: 5px;
+}
+
+td form.assign-form input[type="text"] {
+    width: 100px;
+    padding: 6px;
+}
+
+td form.assign-form button {
+    padding: 6px 10px;
+    font-size: 14px;
+}
+
+/* General headings */
+h2, h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Links */
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    thead {
+        display: none;
+    }
+
+    tbody td {
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+    }
+
+    tbody td::before {
+        position: absolute;
+        left: 15px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        content: attr(data-label);
+        text-align: left;
+        font-weight: bold;
+    }
+
+    td form.assign-form {
+        flex-direction: column;
+    }
+}
+</style>
+
+<h2>All MRI Reservations</h2>
+
+<h3>Search and Filter Reservations</h3>
+
+<form method="get" action="{{ url_for('admin.view_reservations') }}" class="search-form">
+    <input type="text" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}">
     <select name="filter">
         <option value="">-- All --</option>
         <option value="assigned" {% if request.args.get('filter') == 'assigned' %}selected{% endif %}>Assigned</option>
         <option value="unassigned" {% if request.args.get('filter') == 'unassigned' %}selected{% endif %}>Unassigned</option>
     </select>
-
     <button type="submit">Apply</button>
 </form>
-
-<br>
 
 <table>
     <thead>
@@ -34,11 +159,11 @@
     <tbody>
         {% for reservation in reservations %}
         <tr>
-            <td>{{ reservation.reservation_date_persian  }}</td>
-            <td>{{ reservation.application_first_name }} {{ reservation.application_last_name }}</td>
-            <td>{{ reservation.patient_name }}</td>
-            <td>{{ reservation.tracking_code }}</td>
-            <td>
+            <td data-label="Reservation Date">{{ reservation.reservation_date_persian }}</td>
+            <td data-label="Applicant Name">{{ reservation.application_first_name }} {{ reservation.application_last_name }}</td>
+            <td data-label="Patient Name">{{ reservation.patient_name }}</td>
+            <td data-label="Tracking Code">{{ reservation.tracking_code }}</td>
+            <td data-label="Image">
                 {% if reservation.uploaded_image_path %}
                     <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}" target="_blank">
                         {{ reservation.uploaded_image_path }}
@@ -47,17 +172,14 @@
                     No Image
                 {% endif %}
             </td>
-            <td>{{ reservation.turn_date_persian or 'N/A' }} {{ reservation.turn_hour or '' }}</td>
-
-            <td>
-                <form action="{{ url_for('admin.assign_turn', req_id=reservation.id) }}" method="POST">
-                    <input type="text" name="turn_date" class="persian-datepicker" required autocomplete="off">
-                    <input type="text" name="turn_hour" class="timepicker" required>
-
+            <td data-label="Turn Date">{{ reservation.turn_date_persian or 'N/A' }} {{ reservation.turn_hour or '' }}</td>
+            <td data-label="Assign Turn">
+                <form action="{{ url_for('admin.assign_turn', req_id=reservation.id) }}" method="POST" class="assign-form">
+                    <input type="text" name="turn_date" class="persian-datepicker" placeholder="Date" required autocomplete="off">
+                    <input type="text" name="turn_hour" class="timepicker" placeholder="Hour" required>
                     <button type="submit">Assign</button>
                 </form>
             </td>
-
         </tr>
         {% endfor %}
     </tbody>

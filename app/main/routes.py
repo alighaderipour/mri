@@ -9,6 +9,7 @@ import os
 import uuid
 import jdatetime
 from app.forms import ProfileForm
+from jdatetime import date as jdate
 # ADD THIS
 main_bp = Blueprint('main', __name__)
 
@@ -81,6 +82,7 @@ def reserve():
     user_data = current_user
     return render_template('form.html', user=user_data, today=today_persian, insurances=insurances)
 
+
 @main_bp.route('/my_reservations')
 @login_required
 def my_reservations():
@@ -91,11 +93,10 @@ def my_reservations():
 
     if reservation_date_persian:
         try:
-            # تبدیل تاریخ شمسی به میلادی
             parts = reservation_date_persian.split('/')
             if len(parts) == 3:
                 jy, jm, jd = map(int, parts)
-                g_date = jdatetime.date(jy, jm, jd).togregorian()
+                g_date = jdate(jy, jm, jd).togregorian()
                 query = query.filter(MRIRequest.reservation_date == g_date)
         except Exception as e:
             flash(f"Invalid Persian date format: {e}")
@@ -107,7 +108,19 @@ def my_reservations():
 
     reservations = query.order_by(MRIRequest.reservation_date.desc()).all()
 
-    return render_template('my_reservations.html', reservations=reservations)
+    # Create a lightweight list for display
+    reservation_data = []
+    for r in reservations:
+        reservation_data.append({
+            'reservation_date_persian': r.reservation_date_persian,  # Already handled in your model maybe
+            'patient_name': r.patient_name,
+            'tracking_code': r.tracking_code,
+            'uploaded_image_path': r.uploaded_image_path,
+            'turn_date_persian': jdate.fromgregorian(date=r.turn_date).strftime('%Y/%m/%d') if r.turn_date else None,
+            'turn_hour': r.turn_hour
+        })
+
+    return render_template('my_reservations.html', reservations=reservation_data)
 
 @main_bp.route('/user_profile', methods=['GET', 'POST'])
 @login_required

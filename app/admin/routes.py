@@ -34,35 +34,66 @@ def can_assign_required(func):
 @login_required
 @admin_required
 def dashboard():
-    reservations = MRIRequest.query.all()
-    users = User.query.all()
+    from jdatetime import date as jdate
 
-    # درست کردن لیست جدید برای رندر
-    reservation_data = []
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    applicant_name = request.args.get('applicant_name')
+
+    query = MRIRequest.query
+
+    # Date filtering
+    if start_date and end_date:
+        try:
+            start_parts = start_date.split('/')
+            end_parts = end_date.split('/')
+            if len(start_parts) == 3 and len(end_parts) == 3:
+                sjy, sjm, sjd = map(int, start_parts)
+                ejy, ejm, ejd = map(int, end_parts)
+                g_start = jdate(sjy, sjm, sjd).togregorian()
+                g_end = jdate(ejy, ejm, ejd).togregorian()
+                query = query.filter(
+                    MRIRequest.reservation_date.between(g_start, g_end)
+                )
+        except Exception as e:
+            flash(f"Date conversion error: {e}")
+            return redirect(url_for('admin.dashboard'))
+
+    # User filtering
+    if applicant_name:
+        query = query.filter(
+            or_(
+                MRIRequest.application_first_name.ilike(f"%{applicant_name}%"),
+                MRIRequest.application_last_name.ilike(f"%{applicant_name}%")
+            )
+        )
+
+    reservations = query.all()
+
+    # --- Count per user ---
+    user_reservation_counts = {}
+
     for r in reservations:
-        if r.turn_date:
-            try:
-                g_date = r.turn_date
-                j_date = jdatetime.date.fromgregorian(date=g_date)
-                turn_date_persian = persian.convert_en_numbers(j_date.strftime('%Y/%m/%d'))
-            except Exception:
-                turn_date_persian = "خطا"
-        else:
-            turn_date_persian = None
+        user_key = (r.application_first_name, r.application_last_name)
+        if user_key not in user_reservation_counts:
+            user_reservation_counts[user_key] = 0
+        user_reservation_counts[user_key] += 1
 
-        reservation_data.append({
-            'id': r.id,
-            'reservation_date': r.reservation_date,
-            'application_first_name': r.application_first_name,
-            'application_last_name': r.application_last_name,
-            'patient_name': r.patient_name,
-            'tracking_code': r.tracking_code,
-            'uploaded_image_path': r.uploaded_image_path,
-            'turn_date_persian': turn_date_persian,
-            'turn_hour': r.turn_hour,
+    report_data = []
+    for (first_name, last_name), count in user_reservation_counts.items():
+        report_data.append({
+            'first_name': first_name,
+            'last_name': last_name,
+            'reservation_count': count
         })
 
-    return render_template('admin_dashboard.html', reservations=reservation_data, users=users)
+    return render_template('admin_dashboard.html',
+        report_data=report_data,
+        reservations=reservations,
+        start_date=start_date,
+        end_date=end_date,
+        applicant_name=applicant_name
+    )
 
 
 @admin_bp.route('/create_user', methods=['GET', 'POST'])
