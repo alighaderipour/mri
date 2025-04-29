@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}All MRI Reservations{% endblock %}
+{% block title %}درخواست ها{% endblock %}
 
 {% block content %}
 
@@ -134,30 +134,30 @@ a:hover {
 }
 </style>
 
-<h2>All MRI Reservations</h2>
 
-<h3>Search and Filter Reservations</h3>
+
+<h3>جستجو</h3>
 
 <form method="get" action="{{ url_for('admin.view_reservations') }}" class="search-form">
     <input type="text" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}">
     <select name="filter">
-        <option value="">-- All --</option>
-        <option value="assigned" {% if request.args.get('filter') == 'assigned' %}selected{% endif %}>Assigned</option>
-        <option value="unassigned" {% if request.args.get('filter') == 'unassigned' %}selected{% endif %}>Unassigned</option>
+        <option value="">همه</option>
+        <option value="assigned" {% if request.args.get('filter') == 'assigned' %}selected{% endif %}>با نوبت</option>
+        <option value="unassigned" {% if request.args.get('filter') == 'unassigned' %}selected{% endif %}>بدون نوبت</option>
     </select>
-    <button type="submit">Apply</button>
+    <button type="submit">اعمال</button>
 </form>
 
 <table>
     <thead>
         <tr>
-            <th>Reservation Date</th>
-            <th>Applicant Name</th>
-            <th>Patient Name</th>
-            <th>Tracking Code</th>
-            <th>Image</th>
-            <th>Turn Date</th>
-            <th>Assign Turn</th>
+            <th>تاریخ ثبت</th>
+            <th>نام همکار</th>
+            <th>نام مراجعه کننده</th>
+            <th>کد رهگیری</th>
+            <th>عکس</th>
+            <th>تاریخ نوبت</th>
+            <th>ثبت نوبت</th>
         </tr>
     </thead>
     <tbody>
@@ -170,18 +170,18 @@ a:hover {
             <td data-label="Image">
                 {% if reservation.uploaded_image_path %}
                     <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}" target="_blank">
-                        View Image
+                        عکس
                     </a>
                 {% else %}
-                    No Image
+                   بدون عکس
                 {% endif %}
             </td>
-            <td data-label="Turn Date">{{ reservation.turn_date_persian or 'N/A' }} {{ reservation.turn_hour or '' }}</td>
+            <td data-label="Turn Date">{{ reservation.turn_date_persian or 'در انتظار' }} {{ reservation.turn_hour or '' }}</td>
             <td data-label="Assign Turn">
                 <form action="{{ url_for('admin.assign_turn', req_id=reservation.id) }}" method="POST" class="assign-form">
-                    <input type="text" name="turn_date" class="persian-datepicker" placeholder="Date" required autocomplete="off">
-                    <input type="text" name="turn_hour" class="timepicker" placeholder="Hour" required>
-                    <button type="submit">Assign</button>
+                    <input type="text" name="turn_date" class="persian-datepicker" placeholder="تاریخ" required autocomplete="off">
+                    <input type="text" name="turn_hour" class="timepicker" placeholder="ساعت" required>
+                    <button type="submit">نوبت دهی</button>
                 </form>
             </td>
         </tr>

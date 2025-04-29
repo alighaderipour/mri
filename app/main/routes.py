@@ -38,7 +38,7 @@ def reserve():
         ).first()
 
         if existing:
-            flash("You have already submitted a request today.")
+            flash("شما امروز يك درخواست ثبت كرده ايد")
             return redirect(url_for('main.reserve'))
 
         uploaded_file = request.files.get('uploaded_image')
@@ -75,7 +75,7 @@ def reserve():
 
         db.session.add(new_request)
         db.session.commit()
-        flash('Your MRI request has been submitted successfully.')
+        flash('درخواست شما با موفقيت ثبت شد.')
 
         return redirect(url_for('main.reserve'))
 
@@ -127,26 +127,26 @@ def user_profile():
         # Update Password ONLY if user entered something
         if form.current_password.data or form.new_password.data or form.confirm_new_password.data:
             if not form.current_password.data or not form.new_password.data or not form.confirm_new_password.data:
-                flash('To change password, please fill all password fields.', 'error')
+                flash('براي تغيير پسورد فيلد هاي پسورد را تغيير دهيد', 'error')
                 return redirect(url_for('main.user_profile'))
 
             if form.new_password.data != form.confirm_new_password.data:
-                flash('New password and confirmation do not match.', 'error')
+                flash('رمز عبور جديد با تكرار مرز عبور جديد يكسان نيست', 'error')
                 return redirect(url_for('main.user_profile'))
 
             if check_password_hash(current_user.password_hash, form.current_password.data):
                 current_user.password_hash = generate_password_hash(form.new_password.data)
-                flash('Password updated successfully.', 'success')
+                flash('رمز عبور با موفقيت ثبت شد', 'success')
                 updated = True
             else:
-                flash('Current password is incorrect.', 'error')
+                flash('رمزعبور در حال استفاده اشتباه است', 'error')
                 return redirect(url_for('main.user_profile'))
 
         if updated:
             db.session.commit()
-            flash('Profile updated successfully.', 'success')
+            flash('پروفايل با موفقيت به روزرساني شد.', 'success')
         else:
-            flash('No changes detected.', 'info')
+            flash('تغييري انجام نشد.', 'info')
 
         return redirect(url_for('main.user_profile'))
 
@@ -165,12 +165,12 @@ def delete_reservation(reservation_id):
 
     # Check if the reservation belongs to the current user
     if reservation.user_id != current_user.id:
-        flash("You can only delete your own reservations.", "error")
+        flash("فقط ميتوانيد نوبت هاي خود را حذف كنيد.", "error")
         return redirect(url_for('main.my_reservations'))
 
     # Delete the reservation from the database
     db.session.delete(reservation)
     db.session.commit()
 
-    flash("Your reservation has been deleted successfully.", "success")
+    flash("حذف نوبت با موفقيت انجام شد", "success")
     return redirect(url_for('main.my_reservations'))

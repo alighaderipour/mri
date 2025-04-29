@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Reservation Form{% endblock %}
+{% block title %}درخواست جديد{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4">New MRI Reservation</h2>
+    <h2 class="mb-4">ثبت درخواست جديد</h2>
 
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -18,51 +18,51 @@
 
     <form method="post" enctype="multipart/form-data" id="reservationForm" class="row g-3">
         <div class="col-md-6">
-            <label class="form-label">Reservation Date</label>
+            <label class="form-label">تاريخ ثبت درخواست</label>
             <input type="text" class="form-control" name="reservation_date" value="{{ today }}" readonly>
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">Applicant National ID</label>
+            <label class="form-label">كد ملي همكار</label>
             <input type="text" class="form-control" name="applicant_national_id" value="{{ user.national_code }}" readonly>
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">First Name</label>
+            <label class="form-label">نام همكار</label>
             <input type="text" class="form-control" name="application_first_name" value="{{ user.first_name }}" readonly>
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">Last Name</label>
+            <label class="form-label">نام خانوادگي همكار</label>
             <input type="text" class="form-control" name="application_last_name" value="{{ user.last_name }}" readonly>
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">Phone Number</label>
+            <label class="form-label">شماره تلفن همكار</label>
             <input type="text" class="form-control" name="application_phone_number" value="{{ user.phone_number }}" readonly>
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">Section</label>
+            <label class="form-label">بخش</label>
             <input type="text" class="form-control" name="application_section" value="{{ user.section }}" readonly>
         </div>
 
         <hr class="mt-4">
 
         <div class="col-md-6">
-            <label class="form-label">Patient Name</label>
+            <label class="form-label">نام و نام خانوادگي مراجعه كننده</label>
             <input type="text" class="form-control" name="patient_name" required>
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">Patient Phone Number</label>
+            <label class="form-label">شماره همراه مراجعه كننده</label>
             <input type="text" class="form-control" name="patient_phone_number"
             pattern="^09\d{9}$" title="Enter a valid 11-digit Iranian mobile number (e.g., 09123456789)"
             maxlength="11" minlength="11" inputmode="numeric" required>
         </div>
 
         <div class="col-md-6">
-            <label class="form-label">Patient Insurance</label>
+            <label class="form-label">بيمه مراجعه كننده</label>
             <select class="form-select" name="patient_insurance_name" id="insuranceSelect" required>
                 {% for insurance in insurances %}
                     <option value="{{ insurance.name }}" data-image-required="{{ 1 if insurance.image_required else 0 }}"
@@ -74,24 +74,24 @@
         </div>
 
         <div class="col-md-6" id="imageUploadDiv" style="display: none;">
-            <label class="form-label">Upload Insurance Image</label>
+            <label class="form-label">ارسال عكس </label>
             <input type="file" class="form-control" name="uploaded_image" id="uploadedImageInput" accept="image/*">
         </div>
 
         <div class="col-md-6">
-    <label class="form-label">Tracking Code</label>
+    <label class="form-label">كد رهگيري</label>
     <input type="text" class="form-control" name="tracking_code"
            pattern="^\d{4,6}$" title="Tracking code must be 4 to 6 digits"
            maxlength="6" minlength="4" inputmode="numeric" required>
 </div>
 
         <div class="col-md-12">
-            <label class="form-label">Explanation</label>
+            <label class="form-label">توضيحات</label>
             <input type="text" class="form-control" name="explanation" required>
         </div>
 
         <div class="col-12 mt-4">
-            <button type="submit" class="btn btn-primary">Submit Reservation</button>
+            <button type="submit" class="btn btn-primary">ثبت درخواست</button>
         </div>
     </form>
 </div>

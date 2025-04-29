@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}My Reservations{% endblock %}
+{% block title %}درخواست هاي من{% endblock %}
 
 {% block content %}
 <style>
@@ -85,38 +85,38 @@
     }
 </style>
 
-<h2>My Reservations</h2>
+<h2>درخواست های من</h2>
 
 <!-- Filter Section -->
 <form method="get" action="{{ url_for('main.my_reservations') }}">
     <div>
-        <label for="reservation_date">Reservation Date (Persian):</label>
+        <label for="reservation_date">تاريخ درخواست:</label>
         <input type="text" id="reservation_date" name="reservation_date" value="{{ request.args.get('reservation_date', '') }}" placeholder="مثلا 1403/02/09">
     </div>
 
     <div>
-        <label for="turn_assigned">Turn Assigned:</label>
+        <label for="turn_assigned">تاريخ نوبت</label>
         <select id="turn_assigned" name="turn_assigned">
-            <option value="">All</option>
-            <option value="yes" {% if request.args.get('turn_assigned') == 'yes' %}selected{% endif %}>Assigned</option>
-            <option value="no" {% if request.args.get('turn_assigned') == 'no' %}selected{% endif %}>Pending</option>
+            <option value="">همه</option>
+            <option value="yes" {% if request.args.get('turn_assigned') == 'yes' %}selected{% endif %}>با نوبت</option>
+            <option value="no" {% if request.args.get('turn_assigned') == 'no' %}selected{% endif %}>بدون نوبت</option>
         </select>
     </div>
 
-    <button type="submit">Filter</button>
+    <button type="submit">فيلتر</button>
 </form>
 
 <!-- Reservation Table -->
 <table>
     <thead>
         <tr>
-            <th>Reservation Date</th>
-            <th>Patient Name</th>
-            <th>Tracking Code</th>
-            <th>Uploaded Image</th>
-            <th>Turn Date</th>
-            <th>Turn Hour</th>
-            <th>Actions</th> <!-- New Column for Actions -->
+            <th>تاريخ ثبت</th>
+            <th>نام و نام خانوادگي بيمار</th>
+            <th>كد رهگيري</th>
+            <th>عكس</th>
+            <th>تاريخ نوبت</th>
+            <th>ساعت نوبت</th>
+            <th>حذف</th> <!-- New Column for Actions -->
         </tr>
     </thead>
     <tbody>
@@ -129,15 +129,15 @@
                 {% if reservation.uploaded_image_path %}
                     <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}" target="_blank">View Image</a>
                 {% else %}
-                    No Image
+                    بدون عكس
                 {% endif %}
             </td>
-            <td>{{ reservation.turn_date_persian or 'Pending' }}</td>
-            <td>{{ reservation.turn_hour or 'Pending' }}</td>
+            <td>{{ reservation.turn_date_persian or 'در انتظار' }}</td>
+            <td>{{ reservation.turn_hour or 'در انتظار' }}</td>
             <td>
                 <!-- Delete Button -->
-                <form action="{{ url_for('main.delete_reservation', reservation_id=reservation.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this reservation?');">
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                <form action="{{ url_for('main.delete_reservation', reservation_id=reservation.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('آيا از حذف درخواست خود اطمينان داريد؟');">
+                    <button type="submit" class="btn btn-danger">حذف</button>
                 </form>
             </td>
         </tr>
