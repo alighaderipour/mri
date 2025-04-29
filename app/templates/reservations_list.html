@@ -3,6 +3,24 @@
 {% block title %}All MRI Reservations{% endblock %}
 
 {% block content %}
+
+<!-- jQuery (must be first!) -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+
+<!-- Persian Date (dependency) -->
+<script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
+
+<!-- Persian Datepicker CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
+
+<!-- Persian Datepicker JS -->
+<script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
+
+<!-- Flatpickr (for time picking) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- Styles -->
 <style>
 /* Form styling */
 form.search-form {
@@ -12,7 +30,6 @@ form.search-form {
     gap: 10px;
     align-items: center;
 }
-
 form.search-form input[type="text"],
 form.search-form select {
     padding: 8px;
@@ -20,7 +37,6 @@ form.search-form select {
     border-radius: 8px;
     min-width: 180px;
 }
-
 form.search-form button {
     background-color: #4CAF50;
     color: white;
@@ -30,7 +46,6 @@ form.search-form button {
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
-
 form.search-form button:hover {
     background-color: #45a049;
 }
@@ -44,23 +59,19 @@ table {
     border-radius: 12px;
     overflow: hidden;
 }
-
 thead {
     background-color: #f2f2f2;
 }
-
 thead th {
     padding: 12px;
     text-align: left;
     font-weight: bold;
     border-bottom: 2px solid #ddd;
 }
-
 tbody td {
     padding: 12px;
     border-bottom: 1px solid #eee;
 }
-
 tbody tr:hover {
     background-color: #f9f9f9;
 }
@@ -70,12 +81,10 @@ td form.assign-form {
     display: flex;
     gap: 5px;
 }
-
 td form.assign-form input[type="text"] {
     width: 100px;
     padding: 6px;
 }
-
 td form.assign-form button {
     padding: 6px 10px;
     font-size: 14px;
@@ -92,7 +101,6 @@ a {
     color: #007bff;
     text-decoration: none;
 }
-
 a:hover {
     text-decoration: underline;
 }
@@ -102,17 +110,14 @@ a:hover {
     table, thead, tbody, th, td, tr {
         display: block;
     }
-
     thead {
         display: none;
     }
-
     tbody td {
         position: relative;
         padding-left: 50%;
         text-align: right;
     }
-
     tbody td::before {
         position: absolute;
         left: 15px;
@@ -123,7 +128,6 @@ a:hover {
         text-align: left;
         font-weight: bold;
     }
-
     td form.assign-form {
         flex-direction: column;
     }
@@ -166,7 +170,7 @@ a:hover {
             <td data-label="Image">
                 {% if reservation.uploaded_image_path %}
                     <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}" target="_blank">
-                        {{ reservation.uploaded_image_path }}
+                        View Image
                     </a>
                 {% else %}
                     No Image
@@ -184,4 +188,33 @@ a:hover {
         {% endfor %}
     </tbody>
 </table>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Initialize Flatpickr for time inputs
+    flatpickr(".timepicker", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true
+    });
+
+    // Initialize Persian Datepicker on #turn_date input field
+    $('.persian-datepicker').persianDatepicker({
+        format: 'YYYY/MM/DD', // Show date as 'Year/Month/Day'
+        calendarType: 'persian', // Persian calendar
+        initialValue: false, // Don't pre-fill any value
+        autoClose: true, // Close calendar after selecting a date
+        observer: true, // Observe changes to the input field
+        navigator: {
+            scroll: {
+                enabled: false // Disable scrolling in the calendar
+            }
+        }
+    });
+
+    console.log(typeof $().persianDatepicker); // Ensure it is initialized
+});
+</script>
+
 {% endblock %}
