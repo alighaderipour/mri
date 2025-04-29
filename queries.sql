@@ -52,3 +52,10 @@ insert into users (  username ,password_hash  ,national_code  ,first_name  ,last
 is_admin  ,can_assign_turn ,is_active)
 values ('admin' , 'scrypt:32768:8:1$mCO52UTrXvFJikU9$9f40a57b978a5082d1dfb64dd0ae7a03b7946ae714157519bbb2e48a072b9219efd8fbcf1adfc383accf86ae8f9efa0bdc362e282dc785a7f935596139c8f3fa' ,
 '2980279315','علي','قادري پور', '09131958575','فاوا',1,1,1)
+
+
+
+CREATE TABLE sections (
+    section_nr INT PRIMARY KEY,
+    name NVARCHAR(60) NOT NULL
+);
