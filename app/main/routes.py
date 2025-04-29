@@ -27,25 +27,48 @@ def serve_image(filename):
 def reserve():
     insurances = Insurance.query.all()
     today_gregorian = date.today()
-    # Persian today
-    today_persian = jdatetime.date.today().strftime('%Y/%m/%d')  # Format nicely like 1403/02/08
+    today_persian = jdatetime.date.today().strftime('%Y/%m/%d')
+
     if request.method == 'POST':
         data = request.form
 
+        # ✅ CHECK: One request per day per applicant
         existing = MRIRequest.query.filter_by(
             applicant_national_id=data['applicant_national_id'],
             reservation_date=today_gregorian
         ).first()
 
         if existing:
-            flash("شما امروز يك درخواست ثبت كرده ايد")
+            flash("شما امروز يك درخواست ثبت كرده‌ايد.")
             return redirect(url_for('main.reserve'))
 
+        # ✅ CHECK: Max 3 requests per month per user
+        from sqlalchemy import extract, and_
+
+        monthly_count = MRIRequest.query.filter(
+            and_(
+                MRIRequest.user_id == current_user.id,
+                extract('year', MRIRequest.reservation_date) == today_gregorian.year,
+                extract('month', MRIRequest.reservation_date) == today_gregorian.month
+            )
+        ).count()
+
+        if monthly_count >= 3:
+            flash("شما در اين ماه قبلاً ۳ درخواست ثبت كرده‌ايد.")
+            return redirect(url_for('main.reserve'))
+
+        # ✅ CHECK: Max 10 total requests per day across all users
+        daily_total = MRIRequest.query.filter_by(reservation_date=today_gregorian).count()
+
+        if daily_total >= 10:
+            flash("سقف تعداد درخواست‌ها براي امروز پر شده است. لطفاً فردا مجدداً تلاش كنيد.")
+            return redirect(url_for('main.reserve'))
+
+        # ✅ HANDLE file upload
         uploaded_file = request.files.get('uploaded_image')
         image_path = None
 
         if uploaded_file:
-            # Safe to use current_app here to determine the upload folder
             UPLOAD_FOLDER = os.path.join(current_app.root_path, 'images')
             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -53,10 +76,10 @@ def reserve():
             save_path = os.path.join(UPLOAD_FOLDER, filename)
             uploaded_file.save(save_path)
 
-            # Fix the path for URL to access the image from the /images directory
             relative_path = os.path.join('images', filename).replace('\\', '/')
             image_path = relative_path
 
+        # ✅ CREATE and save the request
         new_request = MRIRequest(
             reservation_date=today_gregorian,
             applicant_national_id=data['applicant_national_id'],

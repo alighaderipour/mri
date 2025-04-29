@@ -7,7 +7,7 @@ class Config:
         "mssql+pyodbc",
         username="sa",
         password="Aa@123456",
-        host="DESKTOP-ICP5P36",
+        host="DESKTOP-PJBJFIB",
         database="mri",
         query={
             "driver": "ODBC Driver 17 for SQL Server",
