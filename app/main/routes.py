@@ -108,19 +108,8 @@ def my_reservations():
 
     reservations = query.order_by(MRIRequest.reservation_date.desc()).all()
 
-    # Create a lightweight list for display
-    reservation_data = []
-    for r in reservations:
-        reservation_data.append({
-            'reservation_date_persian': r.reservation_date_persian,  # Already handled in your model maybe
-            'patient_name': r.patient_name,
-            'tracking_code': r.tracking_code,
-            'uploaded_image_path': r.uploaded_image_path,
-            'turn_date_persian': jdate.fromgregorian(date=r.turn_date).strftime('%Y/%m/%d') if r.turn_date else None,
-            'turn_hour': r.turn_hour
-        })
-
-    return render_template('my_reservations.html', reservations=reservation_data)
+    # Return reservations directly (not converting to dict)
+    return render_template('my_reservations.html', reservations=reservations)
 
 @main_bp.route('/user_profile', methods=['GET', 'POST'])
 @login_required
@@ -166,3 +155,22 @@ def user_profile():
         form.national_code.data = current_user.national_code
 
     return render_template('user_profile.html', form=form)
+
+
+@main_bp.route('/delete_reservation/<int:reservation_id>', methods=['POST'])
+@login_required
+def delete_reservation(reservation_id):
+    # Fetch the reservation by ID
+    reservation = MRIRequest.query.get_or_404(reservation_id)
+
+    # Check if the reservation belongs to the current user
+    if reservation.user_id != current_user.id:
+        flash("You can only delete your own reservations.", "error")
+        return redirect(url_for('main.my_reservations'))
+
+    # Delete the reservation from the database
+    db.session.delete(reservation)
+    db.session.commit()
+
+    flash("Your reservation has been deleted successfully.", "success")
+    return redirect(url_for('main.my_reservations'))
