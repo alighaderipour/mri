@@ -10,7 +10,7 @@ import uuid
 import jdatetime
 from app.forms import ProfileForm
 from jdatetime import date as jdate
-# ADD THIS
+
 main_bp = Blueprint('main', __name__)
 
 # Route to serve images from the /images directory
@@ -18,7 +18,6 @@ main_bp = Blueprint('main', __name__)
 def serve_image(filename):
     image_path = os.path.join(current_app.root_path, 'images', filename)
     if not os.path.exists(image_path):
-        # اگر فایل نبود، یه صفحه HTML زیبا نشون بده
         return render_template('404_image.html'), 404
     return send_from_directory(os.path.join(current_app.root_path, 'images'), filename)
 
@@ -37,14 +36,12 @@ def reserve():
             applicant_national_id=data['applicant_national_id'],
             reservation_date=today_gregorian
         ).first()
-
         if existing:
             flash("شما امروز يك درخواست ثبت كرده‌ايد.")
             return redirect(url_for('main.reserve'))
 
         # ✅ CHECK: Max 3 requests per month per user
         from sqlalchemy import extract, and_
-
         monthly_count = MRIRequest.query.filter(
             and_(
                 MRIRequest.user_id == current_user.id,
@@ -52,32 +49,33 @@ def reserve():
                 extract('month', MRIRequest.reservation_date) == today_gregorian.month
             )
         ).count()
-
         if monthly_count >= 3:
             flash("شما در اين ماه قبلاً ۳ درخواست ثبت كرده‌ايد.")
             return redirect(url_for('main.reserve'))
 
         # ✅ CHECK: Max 10 total requests per day across all users
         daily_total = MRIRequest.query.filter_by(reservation_date=today_gregorian).count()
-
         if daily_total >= 10:
             flash("سقف تعداد درخواست‌ها براي امروز پر شده است. لطفاً فردا مجدداً تلاش كنيد.")
             return redirect(url_for('main.reserve'))
 
+        # ✅ Validate 'has_requested_site'
+        has_requested_site = data.get('has_requested_site')
+        if has_requested_site not in ['0', '1']:
+            flash("لطفاً مشخص کنید که آیا قبلاً درخواستی ثبت کرده‌اید یا خیر.")
+            return redirect(url_for('main.reserve'))
+        has_requested_site = has_requested_site == '1'
+
         # ✅ HANDLE file upload
         uploaded_file = request.files.get('uploaded_image')
         image_path = None
-
         if uploaded_file:
             UPLOAD_FOLDER = os.path.join(current_app.root_path, 'images')
             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
             filename = str(uuid.uuid4()) + os.path.splitext(uploaded_file.filename)[1]
             save_path = os.path.join(UPLOAD_FOLDER, filename)
             uploaded_file.save(save_path)
-
-            relative_path = os.path.join('images', filename).replace('\\', '/')
-            image_path = relative_path
+            image_path = os.path.join('images', filename).replace('\\', '/')
 
         # ✅ CREATE and save the request
         new_request = MRIRequest(
@@ -93,18 +91,17 @@ def reserve():
             patient_insurance_name=data['patient_insurance_name'],
             tracking_code=data['tracking_code'],
             explanation=data['explanation'],
-            uploaded_image_path=image_path
+            uploaded_image_path=image_path,
+            has_requested_site=has_requested_site
         )
 
         db.session.add(new_request)
         db.session.commit()
         flash('درخواست شما با موفقيت ثبت شد.')
-
         return redirect(url_for('main.reserve'))
 
     user_data = current_user
     return render_template('form.html', user=user_data, today=today_persian, insurances=insurances)
-
 
 @main_bp.route('/my_reservations')
 @login_required
@@ -130,8 +127,6 @@ def my_reservations():
         query = query.filter(MRIRequest.turn_date.is_(None))
 
     reservations = query.order_by(MRIRequest.reservation_date.desc()).all()
-
-    # Return reservations directly (not converting to dict)
     return render_template('my_reservations.html', reservations=reservations)
 
 @main_bp.route('/user_profile', methods=['GET', 'POST'])
@@ -147,7 +142,7 @@ def user_profile():
             current_user.national_code = form.national_code.data
             updated = True
 
-        # Update Password ONLY if user entered something
+        # Update Password
         if form.current_password.data or form.new_password.data or form.confirm_new_password.data:
             if not form.current_password.data or not form.new_password.data or not form.confirm_new_password.data:
                 flash('براي تغيير پسورد فيلد هاي پسورد را تغيير دهيد', 'error')
@@ -173,27 +168,20 @@ def user_profile():
 
         return redirect(url_for('main.user_profile'))
 
-    # Pre-fill national code
     if request.method == 'GET':
         form.national_code.data = current_user.national_code
 
     return render_template('user_profile.html', form=form)
 
-
 @main_bp.route('/delete_reservation/<int:reservation_id>', methods=['POST'])
 @login_required
 def delete_reservation(reservation_id):
-    # Fetch the reservation by ID
     reservation = MRIRequest.query.get_or_404(reservation_id)
-
-    # Check if the reservation belongs to the current user
     if reservation.user_id != current_user.id:
         flash("فقط ميتوانيد نوبت هاي خود را حذف كنيد.", "error")
         return redirect(url_for('main.my_reservations'))
 
-    # Delete the reservation from the database
     db.session.delete(reservation)
     db.session.commit()
-
     flash("حذف نوبت با موفقيت انجام شد", "success")
     return redirect(url_for('main.my_reservations'))

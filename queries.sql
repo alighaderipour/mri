@@ -27,6 +27,7 @@ CREATE TABLE mri_requests (
     patient_insurance_name NVARCHAR(20) COLLATE Arabic_100_CI_AI_SC_UTF8 NOT NULL,
     tracking_code NVARCHAR(6) COLLATE Arabic_100_CI_AI_SC_UTF8 NOT NULL,
     explanation NVARCHAR(100) COLLATE Arabic_100_CI_AI_SC_UTF8 NOT NULL,
+	has_requested_site bit default 0,
     submitted_date DATE NOT NULL DEFAULT CAST(GETDATE() AS DATE),
     submitted_hour TIME NOT NULL DEFAULT CAST(GETDATE() AS TIME),
     turn_date DATE NULL,
@@ -59,3 +60,4 @@ CREATE TABLE sections (
     section_nr INT PRIMARY KEY,
     name NVARCHAR(60) NOT NULL
 );
+

@@ -114,6 +114,7 @@
             <th>نام و نام خانوادگي بيمار</th>
             <th>كد رهگيري</th>
             <th>عكس</th>
+            <th>ثبت نام در سایت</th>
             <th>تاريخ نوبت</th>
             <th>ساعت نوبت</th>
             <th>حذف</th> <!-- New Column for Actions -->
@@ -132,6 +133,10 @@
                     بدون عكس
                 {% endif %}
             </td>
+            <td>
+                {{ "بله" if reservation.has_requested_site else "خیر" }}
+            </td>
+
             <td>{{ reservation.turn_date_persian or 'در انتظار' }}</td>
             <td>{{ reservation.turn_hour or 'در انتظار' }}</td>
             <td>

@@ -155,6 +155,7 @@ a:hover {
             <th>نام همکار</th>
             <th>نام مراجعه کننده</th>
             <th>کد رهگیری</th>
+            <th>ثبت نام در سایت</th>
             <th>عکس</th>
             <th>تاریخ نوبت</th>
             <th>ثبت نوبت</th>
@@ -167,6 +168,10 @@ a:hover {
             <td data-label="Applicant Name">{{ reservation.application_first_name }} {{ reservation.application_last_name }}</td>
             <td data-label="Patient Name">{{ reservation.patient_name }}</td>
             <td data-label="Tracking Code">{{ reservation.tracking_code }}</td>
+            <td>
+                {{ "بله" if reservation.has_requested_site else "خیر" }}
+            </td>
+
             <td data-label="Image">
                 {% if reservation.uploaded_image_path %}
                     <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}" target="_blank">

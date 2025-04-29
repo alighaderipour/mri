@@ -40,6 +40,7 @@ class MRIRequest(db.Model):
     patient_insurance_name = db.Column(db.String(20), nullable=False)
     tracking_code = db.Column(db.String(20), nullable=False)
     explanation = db.Column(db.String(100), nullable=False)
+    has_requested_site = db.Column(db.Boolean, default=False)
     submitted_date = db.Column(db.Date, nullable=False, default=datetime.today)
     submitted_hour = db.Column(db.Time, nullable=False, default=datetime.now().time)
     turn_date = db.Column(db.Date, nullable=True)
