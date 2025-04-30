@@ -1,6 +1,9 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+import os
+import uuid
+
+from flask import Blueprint, render_template, redirect, url_for, request, flash, current_app
 from flask_login import login_required, current_user
-from app.models import User, MRIRequest, Pref
+from app.models import User, MRIRequest, Pref, Section
 from app import db
 import re
 import persian
@@ -100,14 +103,17 @@ def dashboard():
 @login_required
 @admin_required
 def create_user():
+    sections = Section.query.all()
+
     if request.method == 'POST':
+        section_id = int(request.form['section'])
+
         username = request.form['username']
         password = request.form['password']
         national_code = request.form['national_code']
         first_name = request.form['first_name']
         last_name = request.form['last_name']
         phone_number = request.form['phone_number']
-        section = request.form['section']
         is_admin = 'is_admin' in request.form
         can_assign_turn = 'can_assign_turn' in request.form
         is_active = 'is_active' in request.form
@@ -122,7 +128,7 @@ def create_user():
             first_name=first_name,
             last_name=last_name,
             phone_number=phone_number,
-            section=section,
+            section=section_id,
             is_admin=is_admin,
             can_assign_turn=can_assign_turn,
             is_active=is_active
@@ -134,14 +140,15 @@ def create_user():
         flash('User created successfully.')
         return redirect(url_for('admin.dashboard'))
 
-    return render_template('create_user.html')
+    return render_template('create_user.html', sections=sections)
 
 @admin_bp.route('/users')
 @login_required
 @admin_required
 def list_users():
     users = User.query.all()
-    return render_template('list_users.html', users=users)
+    sections = Section.query.all()
+    return render_template('list_users.html', users=users, sections=sections)
 
 @admin_bp.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
@@ -153,6 +160,8 @@ def edit_user(user_id):
         new_password = request.form.get('password')
         if new_password:
             user.set_password(new_password)
+        sections = Section.query.all()
+        return render_template('edit_user.html', user=user, sections=sections)
 
         user.first_name = request.form.get('first_name', user.first_name)
         user.last_name = request.form.get('last_name', user.last_name)
@@ -274,6 +283,22 @@ def manage_preferences():
             pref.max_mri_reserve_day = int(request.form['max_mri_reserve_day'])
             pref.max_user_reserve_day = int(request.form['max_user_reserve_day'])
             pref.max_user_reserve_month = int(request.form['max_user_reserve_month'])
+
+            # Handle logo upload
+            logo = request.files.get('logo')
+            if logo and logo.filename != '':
+                filename = f"{uuid.uuid4().hex}_{logo.filename}"
+                upload_path = os.path.join(current_app.root_path, 'static', 'uploads', filename)
+
+                # Ensure directory exists
+                os.makedirs(os.path.dirname(upload_path), exist_ok=True)
+
+                # Save the file
+                logo.save(upload_path)
+
+                # Save the relative path to the DB
+                pref.logo_path = f"uploads/{filename}"
+
             db.session.commit()
             flash('تنظیمات با موفقیت به‌روزرسانی شد.', 'success')
         except ValueError:

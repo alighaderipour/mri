@@ -1,4 +1,14 @@
-use mri
+USE mri;
+GO
+
+-- Create sections table first because users depend on it
+CREATE TABLE sections (
+    section_nr INT PRIMARY KEY,
+    name NVARCHAR(60) NOT NULL
+);
+GO
+
+-- Now create users table
 CREATE TABLE users (
     id INT IDENTITY(1,1) PRIMARY KEY,
     username NVARCHAR(50) UNIQUE NOT NULL,
@@ -6,12 +16,13 @@ CREATE TABLE users (
     national_code VARCHAR(10),
     first_name NVARCHAR(15) NOT NULL,
     last_name NVARCHAR(25) NOT NULL,
-	phone_number nvarchar (11) not null,
-    section NVARCHAR(20) NOT NULL,
+    phone_number NVARCHAR(11) NOT NULL,
+    section INT NOT NULL REFERENCES sections(section_nr), -- Correct inline FK
     is_admin BIT DEFAULT 0,
     can_assign_turn BIT DEFAULT 0,
     is_active BIT DEFAULT 1
 );
+GO
 
 CREATE TABLE mri_requests (
     id INT IDENTITY(1,1) PRIMARY KEY,
@@ -52,14 +63,9 @@ values
 insert into users (  username ,password_hash  ,national_code  ,first_name  ,last_name , phone_number ,section  ,
 is_admin  ,can_assign_turn ,is_active)
 values ('admin' , 'scrypt:32768:8:1$mCO52UTrXvFJikU9$9f40a57b978a5082d1dfb64dd0ae7a03b7946ae714157519bbb2e48a072b9219efd8fbcf1adfc383accf86ae8f9efa0bdc362e282dc785a7f935596139c8f3fa' ,
-'2980279315','علي','قادري پور', '09131958575','فاوا',1,1,1)
+'2980279315','علي','قادري پور', '09131958575',15,1,1,1)
 
 
-
-CREATE TABLE sections (
-    section_nr INT PRIMARY KEY,
-    name NVARCHAR(60) NOT NULL
-);
 
 
 

@@ -1,32 +1,32 @@
 {% extends "base.html" %}
 
-{% block title %}All Users{% endblock %}
+{% block title %}كاربران{% endblock %}
 
 {% block content %}
 <div class="container my-4">
 
-    <h2 class="text-center mb-4">All Users</h2>
+    <h2 class="text-center mb-4">همه كاربران</h2>
 
     <div class="text-end mb-3">
-        <a href="{{ url_for('admin.create_user') }}" class="btn btn-success">➕ Create New User</a>
+        <a href="{{ url_for('admin.create_user') }}" class="btn btn-success">➕ ايجاد كاربري جديد</a>
     </div>
 
     <div class="table-responsive">
         <table class="table table-bordered table-striped table-hover align-middle">
             <thead class="table-light text-center">
                 <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Password</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>National Code</th>
-                    <th>Phone Number</th>
-                    <th>Section</th>
-                    <th>Is Admin</th>
-                    <th>Can Assign Turn</th>
-                    <th>Is Active</th>
-                    <th>Edit</th>
+                    <th>رديف</th>
+                    <th>نام كاربري</th>
+                    <th>كلمه عبور</th>
+                    <th>نام</th>
+                    <th>نام خانوادگي</th>
+                    <th>كد ملي</th>
+                    <th>شماره تلفن</th>
+                    <th>بخش</th>
+                    <th>ادمين</th>
+                    <th>نوبت دهنده</th>
+                    <th>فعال</th>
+                    <th>ويرايش</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,7 +40,16 @@
                         <td><input type="text" name="last_name" class="form-control form-control-sm" value="{{ user.last_name }}"></td>
                         <td><input type="text" name="national_code" class="form-control form-control-sm" value="{{ user.national_code }}"></td>
                         <td><input type="text" name="phone_number" class="form-control form-control-sm" value="{{ user.phone_number }}"></td>
-                        <td><input type="text" name="section" class="form-control form-control-sm" value="{{ user.section }}"></td>
+                        <td>
+    <select name="section" class="form-control form-control-sm" required>
+        {% for sec in sections %}
+            <option value="{{ sec.section_nr }}" {% if sec.section_nr == user.section %}selected{% endif %}>
+
+                {{ sec.name }}
+            </option>
+        {% endfor %}
+    </select>
+</td>
                         <td class="text-center">
                             <input type="checkbox" name="is_admin" class="form-check-input" {% if user.is_admin %}checked{% endif %}>
                         </td>
@@ -51,7 +60,7 @@
                             <input type="checkbox" name="is_active" class="form-check-input" {% if user.is_active %}checked{% endif %}>
                         </td>
                         <td class="text-center">
-                            <button type="submit" class="btn btn-primary btn-sm">💾 Save</button>
+                            <button type="submit" class="btn btn-primary btn-sm">💾 ذخيره</button>
                         </td>
                     </form>
                 </tr>

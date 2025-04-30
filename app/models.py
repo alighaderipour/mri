@@ -14,7 +14,7 @@ class User(UserMixin, db.Model):
     first_name = db.Column(db.String(15), nullable=False)
     last_name = db.Column(db.String(25), nullable=False)
     phone_number = db.Column(db.String(11), nullable=False)
-    section = db.Column(db.String(20), nullable=False)
+    section = db.Column(db.Integer, db.ForeignKey('sections.section_nr'), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     can_assign_turn = db.Column(db.Boolean, default=False)
     is_active = db.Column(db.Boolean, default=True)
@@ -82,3 +82,14 @@ class Pref(db.Model):
     max_mri_reserve_day =db.Column(db.Integer, nullable=False)
     max_user_reserve_day = db.Column(db.Integer, nullable=False)
     max_user_reserve_month = db.Column(db.Integer, nullable=False)
+    logo_path = db.Column(db.String(255), nullable=True)
+
+
+class Section(db.Model):
+    __tablename__ = 'sections'
+
+    section_nr = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(60), nullable=False)
+
+    def __repr__(self):
+        return f"<Section {self.name}>"
