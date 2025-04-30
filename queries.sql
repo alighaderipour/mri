@@ -69,12 +69,13 @@ values ('admin' , 'scrypt:32768:8:1$mCO52UTrXvFJikU9$9f40a57b978a5082d1dfb64dd0a
 
 
 
-create table pref(
-id int identity (1,1) primary key ,
-max_mri_reserve_day int ,
-max_user_reserve_day int,
-max_user_reserve_month int
-)
+CREATE TABLE pref (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    max_mri_reserve_day INT,
+    max_user_reserve_day INT,
+    max_user_reserve_month INT,
+    logo_path nvarchar(max) null
+);
 
 insert into pref(max_mri_reserve_day, max_user_reserve_day,  max_user_reserve_month) values
 (10,1,3)
