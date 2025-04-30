@@ -61,3 +61,15 @@ CREATE TABLE sections (
     name NVARCHAR(60) NOT NULL
 );
 
+
+
+create table pref(
+id int identity (1,1) primary key ,
+max_mri_reserve_day int ,
+max_user_reserve_day int,
+max_user_reserve_month int
+)
+
+insert into pref(max_mri_reserve_day, max_user_reserve_day,  max_user_reserve_month) values
+(10,1,3)
+

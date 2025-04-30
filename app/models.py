@@ -4,6 +4,7 @@ from app import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 import jdatetime
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -74,3 +75,10 @@ class Insurance(db.Model):
 
     def __repr__(self):
         return f"<Insurance {self.name}>"
+
+class Pref(db.Model):
+    __tablename__ = 'pref'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    max_mri_reserve_day =db.Column(db.Integer, nullable=False)
+    max_user_reserve_day = db.Column(db.Integer, nullable=False)
+    max_user_reserve_month = db.Column(db.Integer, nullable=False)

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from app.models import User, MRIRequest
+from app.models import User, MRIRequest, Pref
 from app import db
 import re
 import persian
@@ -258,3 +258,27 @@ def view_image(req_id):
 
     from flask import Response
     return Response(request_obj.uploaded_image, mimetype='image/jpeg')
+
+
+@admin_bp.route('/preferences', methods=['GET', 'POST'])
+@login_required
+def manage_preferences():
+    pref = Pref.query.first()
+    if not pref:
+        pref = Pref(max_mri_reserve_day=10, max_user_reserve_day=1, max_user_reserve_month=3)
+        db.session.add(pref)
+        db.session.commit()
+
+    if request.method == 'POST':
+        try:
+            pref.max_mri_reserve_day = int(request.form['max_mri_reserve_day'])
+            pref.max_user_reserve_day = int(request.form['max_user_reserve_day'])
+            pref.max_user_reserve_month = int(request.form['max_user_reserve_month'])
+            db.session.commit()
+            flash('تنظیمات با موفقیت به‌روزرسانی شد.', 'success')
+        except ValueError:
+            flash('ورودی نامعتبر است. لطفاً مقادیر عددی وارد کنید.', 'error')
+
+        return redirect(url_for('admin.manage_preferences'))
+
+    return render_template('pref.html', pref=pref)

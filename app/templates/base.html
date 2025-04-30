@@ -58,6 +58,9 @@
                            href="{{ url_for('admin.list_users') }}">كاربران</a>
                         <a class="nav-link {% if request.endpoint == 'admin.view_reservations' %}active{% endif %}"
                            href="{{ url_for('admin.view_reservations') }}">تمامي درخواست ها</a>
+                        <a class="nav-link {% if request.endpoint == 'admin.manage_preferences' %}active{% endif %}"
+                           href="{{ url_for('admin.manage_preferences') }}">تنظيمات</a>
+
                     {% endif %}
                 </div>
                 <div class="navbar-nav ms-auto">

@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app.models import MRIRequest, Insurance
+from app.models import MRIRequest, Insurance, Pref
 from app import db
 from datetime import date
 import os
@@ -28,20 +28,28 @@ def reserve():
     today_gregorian = date.today()
     today_persian = jdatetime.date.today().strftime('%Y/%m/%d')
 
+    pref = Pref.query.first()
+    if not pref:
+        flash("تنظیمات برنامه پیدا نشد.")
+        return redirect(url_for('main.reserve'))
+
     if request.method == 'POST':
         data = request.form
 
         # ✅ CHECK: One request per day per applicant
-        existing = MRIRequest.query.filter_by(
+        max_daily_per_user = pref.max_user_reserve_day
+        daily_user_count = MRIRequest.query.filter_by(
             applicant_national_id=data['applicant_national_id'],
             reservation_date=today_gregorian
-        ).first()
-        if existing:
-            flash("شما امروز يك درخواست ثبت كرده‌ايد.")
+        ).count()
+
+        if daily_user_count >= max_daily_per_user:
+            flash(f"شما امروز سقف تعداد درخواست ({max_daily_per_user}) را ثبت كرده‌ايد.")
             return redirect(url_for('main.reserve'))
 
         # ✅ CHECK: Max 3 requests per month per user
         from sqlalchemy import extract, and_
+        max_monthly_requests = pref.max_user_reserve_month
         monthly_count = MRIRequest.query.filter(
             and_(
                 MRIRequest.user_id == current_user.id,
@@ -49,14 +57,16 @@ def reserve():
                 extract('month', MRIRequest.reservation_date) == today_gregorian.month
             )
         ).count()
-        if monthly_count >= 3:
-            flash("شما در اين ماه قبلاً ۳ درخواست ثبت كرده‌ايد.")
+        if monthly_count >= max_monthly_requests:
+            flash("شما در اين ماه قبلاً {} درخواست ثبت كرده‌ايد.".format(max_monthly_requests))
             return redirect(url_for('main.reserve'))
 
         # ✅ CHECK: Max 10 total requests per day across all users
+        max_daily_requests = pref.max_mri_reserve_day
         daily_total = MRIRequest.query.filter_by(reservation_date=today_gregorian).count()
-        if daily_total >= 10:
-            flash("سقف تعداد درخواست‌ها براي امروز پر شده است. لطفاً فردا مجدداً تلاش كنيد.")
+        if daily_total >= max_daily_requests:
+            flash("سقف تعداد درخواست‌ها براي امروز ({}) پر شده است. لطفاً فردا مجدداً تلاش كنيد.".format(
+                max_daily_requests))
             return redirect(url_for('main.reserve'))
 
         # ✅ Validate 'has_requested_site'
