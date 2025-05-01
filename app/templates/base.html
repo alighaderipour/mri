@@ -56,11 +56,13 @@
                            href="{{ url_for('admin.dashboard') }}">داشبورد</a>
                         <a class="nav-link {% if request.endpoint == 'admin.list_users' %}active{% endif %}"
                            href="{{ url_for('admin.list_users') }}">كاربران</a>
-                        <a class="nav-link {% if request.endpoint == 'admin.view_reservations' %}active{% endif %}"
-                           href="{{ url_for('admin.view_reservations') }}">تمامي درخواست ها</a>
                         <a class="nav-link {% if request.endpoint == 'admin.manage_preferences' %}active{% endif %}"
                            href="{{ url_for('admin.manage_preferences') }}">تنظيمات</a>
 
+                    {% endif %}
+                    {% if current_user.is_authenticated and current_user.is_admin or current_user.can_assign_turn %}
+                    <a class="nav-link {% if request.endpoint == 'admin.view_reservations' %}active{% endif %}"
+                           href="{{ url_for('admin.view_reservations') }}">تمامي درخواست ها</a>
                     {% endif %}
                 </div>
                 <div class="navbar-nav ms-auto">

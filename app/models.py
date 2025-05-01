@@ -46,6 +46,7 @@ class MRIRequest(db.Model):
     submitted_hour = db.Column(db.Time, nullable=False, default=datetime.now().time)
     turn_date = db.Column(db.Date, nullable=True)
     turn_hour = db.Column(db.Time, nullable=True)
+    turn_explanation = db.Column(db.String(255), nullable=True)  # Stori
     uploaded_image_path = db.Column(db.String(255), nullable=True)  # Storing raw image data
 
     @property

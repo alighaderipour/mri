@@ -8,7 +8,8 @@ from app import db
 import re
 import persian
 import jdatetime
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, String, cast
+
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
 # --- Decorators ---
@@ -184,20 +185,55 @@ def edit_user(user_id):
 def view_reservations():
     filter_status = request.args.get('filter')
     search_query = request.args.get('q')
+    from_date_str = request.args.get('from_date')  # e.g. '1404/02/11'
+    to_date_str = request.args.get('to_date')      # e.g. '1404/02/14'
 
     query = MRIRequest.query
+
+    # --- Persian Date Range Filter ---
+    try:
+        if from_date_str:
+            jy, jm, jd = map(int, from_date_str.strip().split('/'))
+            from_date = jdatetime.date(jy, jm, jd).togregorian()
+            query = query.filter(MRIRequest.reservation_date >= from_date)
+    except Exception:
+        pass
+
+    try:
+        if to_date_str:
+            jy, jm, jd = map(int, to_date_str.strip().split('/'))
+            to_date = jdatetime.date(jy, jm, jd).togregorian()
+            query = query.filter(MRIRequest.reservation_date <= to_date)
+    except Exception:
+        pass
 
     # --- Search ---
     if search_query:
         search = f"%{search_query}%"
-        query = query.filter(
-            or_(
-                MRIRequest.patient_name.ilike(search),
-                MRIRequest.application_first_name.ilike(search),
-                MRIRequest.application_last_name.ilike(search),
-                MRIRequest.tracking_code.ilike(search)
-            )
-        )
+
+        # Convert search query if it's a Persian date
+        try:
+            parts = search_query.strip().split('/')
+            if len(parts) == 3:
+                jy, jm, jd = map(int, parts)
+                gregorian_date = jdatetime.date(jy, jm, jd).togregorian()
+                gregorian_str = gregorian_date.strftime('%Y-%m-%d')
+            else:
+                gregorian_str = None
+        except Exception:
+            gregorian_str = None
+
+        conditions = [
+            MRIRequest.patient_name.ilike(search),
+            MRIRequest.application_first_name.ilike(search),
+            MRIRequest.application_last_name.ilike(search),
+            MRIRequest.tracking_code.ilike(search),
+        ]
+
+        if gregorian_str:
+            conditions.append(cast(MRIRequest.reservation_date, String).ilike(f"%{gregorian_str}%"))
+
+        query = query.filter(or_(*conditions))
 
     # --- Filter ---
     if filter_status == 'assigned':
@@ -205,7 +241,7 @@ def view_reservations():
             MRIRequest.turn_date.isnot(None),
             MRIRequest.turn_hour.isnot(None)
         )
-    elif filter_status == 'unassigned':
+    elif filter_status == 'unassigned' or filter_status is None:
         query = query.filter(
             or_(
                 MRIRequest.turn_date.is_(None),
@@ -220,14 +256,15 @@ def view_reservations():
 @login_required
 def assign_turn(req_id):
     if not (current_user.is_admin or current_user.can_assign_turn):
-        flash("You don't have permission to assign turns.")
+        flash("شما دسترسي براي دادن نوبت نداريد")
         return redirect(url_for('main.reserve'))
 
     turn_date_raw = request.form.get('turn_date')
     turn_hour_raw = request.form.get('turn_hour')
+    turn_explanation = request.form.get('turn_explanation')
 
     if not turn_date_raw or not turn_hour_raw:
-        flash("Both turn date and turn hour are required.")
+        flash("وارد كردن تاريخ و زمان اجباري است")
         return redirect(url_for('admin.view_reservations'))
 
     # Step 1: Convert Persian numbers to English
@@ -251,9 +288,10 @@ def assign_turn(req_id):
     request_obj = MRIRequest.query.get_or_404(req_id)
     request_obj.turn_date = turn_date_final
     request_obj.turn_hour = turn_hour_en
+    request_obj.turn_explanation = turn_explanation
 
     db.session.commit()
-    flash("Turn assigned successfully.")
+    flash("ثبت نوبت با موفقيت انجام شد")
     return redirect(url_for('admin.view_reservations'))
 
 

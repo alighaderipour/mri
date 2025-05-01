@@ -4,25 +4,22 @@
 
 {% block content %}
 
-<!-- jQuery (must be first!) -->
+<!-- jQuery -->
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
 
-<!-- Persian Date (dependency) -->
+<!-- Persian Date -->
 <script src="https://cdn.jsdelivr.net/npm/persian-date@1.1.0/dist/persian-date.min.js"></script>
 
-<!-- Persian Datepicker CSS -->
+<!-- Persian Datepicker CSS & JS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/css/persian-datepicker.min.css">
-
-<!-- Persian Datepicker JS -->
 <script src="https://cdn.jsdelivr.net/npm/persian-datepicker@1.2.0/dist/js/persian-datepicker.min.js"></script>
 
-<!-- Flatpickr (for time picking) -->
+<!-- Flatpickr (Timepicker) -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <!-- Styles -->
 <style>
-/* Form styling */
 form.search-form {
     margin-bottom: 20px;
     display: flex;
@@ -49,8 +46,6 @@ form.search-form button {
 form.search-form button:hover {
     background-color: #45a049;
 }
-
-/* Table styling */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -75,10 +70,9 @@ tbody td {
 tbody tr:hover {
     background-color: #f9f9f9;
 }
-
-/* Button inside table */
 td form.assign-form {
     display: flex;
+    flex-wrap: wrap;
     gap: 5px;
 }
 td form.assign-form input[type="text"] {
@@ -89,14 +83,10 @@ td form.assign-form button {
     padding: 6px 10px;
     font-size: 14px;
 }
-
-/* General headings */
-h2, h3 {
+h3 {
     color: #333;
     margin-bottom: 10px;
 }
-
-/* Links */
 a {
     color: #007bff;
     text-decoration: none;
@@ -104,8 +94,6 @@ a {
 a:hover {
     text-decoration: underline;
 }
-
-/* Responsive tweaks */
 @media (max-width: 768px) {
     table, thead, tbody, th, td, tr {
         display: block;
@@ -131,20 +119,29 @@ a:hover {
     td form.assign-form {
         flex-direction: column;
     }
+    td form.assign-form textarea {
+        padding: 6px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        resize: vertical;
+    }
 }
 </style>
-
-
 
 <h3>جستجو</h3>
 
 <form method="get" action="{{ url_for('admin.view_reservations') }}" class="search-form">
     <input type="text" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}">
+
+    <input type="text" name="from_date" id="from_date" class="persian-datepicker" placeholder="از تاریخ" value="{{ request.args.get('from_date', '') }}">
+    <input type="text" name="to_date" id="to_date" class="persian-datepicker" placeholder="تا تاریخ" value="{{ request.args.get('to_date', '') }}">
+
     <select name="filter">
         <option value="">همه</option>
         <option value="assigned" {% if request.args.get('filter') == 'assigned' %}selected{% endif %}>با نوبت</option>
         <option value="unassigned" {% if request.args.get('filter') == 'unassigned' %}selected{% endif %}>بدون نوبت</option>
     </select>
+
     <button type="submit">اعمال</button>
 </form>
 
@@ -158,6 +155,8 @@ a:hover {
             <th>ثبت نام در سایت</th>
             <th>عکس</th>
             <th>تاریخ نوبت</th>
+            <th>ساعت نوبت</th>
+            <th>توضيحات</th>
             <th>ثبت نوبت</th>
         </tr>
     </thead>
@@ -168,24 +167,22 @@ a:hover {
             <td data-label="Applicant Name">{{ reservation.application_first_name }} {{ reservation.application_last_name }}</td>
             <td data-label="Patient Name">{{ reservation.patient_name }}</td>
             <td data-label="Tracking Code">{{ reservation.tracking_code }}</td>
-            <td>
-                {{ "بله" if reservation.has_requested_site else "خیر" }}
-            </td>
-
+            <td>{{ "بله" if reservation.has_requested_site else "خیر" }}</td>
             <td data-label="Image">
                 {% if reservation.uploaded_image_path %}
-                    <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}" target="_blank">
-                        عکس
-                    </a>
+                    <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}" target="_blank">عکس</a>
                 {% else %}
-                   بدون عکس
+                    بدون عکس
                 {% endif %}
             </td>
-            <td data-label="Turn Date">{{ reservation.turn_date_persian or 'در انتظار' }} {{ reservation.turn_hour or '' }}</td>
-            <td data-label="Assign Turn">
+            <td data-label="Turn Date">{{ reservation.turn_date_persian or 'در انتظار' }}</td>
+            <td data-label="Turn Hour">{{ reservation.turn_hour or '' }}</td>
+            <td data-label="Turn Explanation">{{ reservation.turn_explanation or 'توضيحات' }}</td>
+            <td data-label="Assign Turn" colspan="2">
                 <form action="{{ url_for('admin.assign_turn', req_id=reservation.id) }}" method="POST" class="assign-form">
                     <input type="text" name="turn_date" class="persian-datepicker" placeholder="تاریخ" required autocomplete="off">
                     <input type="text" name="turn_hour" class="timepicker" placeholder="ساعت" required>
+                    <textarea name="turn_explanation" placeholder="توضیحات" rows="2" style="min-width: 250px;" required></textarea>
                     <button type="submit">نوبت دهی</button>
                 </form>
             </td>
@@ -196,7 +193,6 @@ a:hover {
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Initialize Flatpickr for time inputs
     flatpickr(".timepicker", {
         enableTime: true,
         noCalendar: true,
@@ -204,21 +200,18 @@ document.addEventListener('DOMContentLoaded', function () {
         time_24hr: true
     });
 
-    // Initialize Persian Datepicker on #turn_date input field
     $('.persian-datepicker').persianDatepicker({
-        format: 'YYYY/MM/DD', // Show date as 'Year/Month/Day'
-        calendarType: 'persian', // Persian calendar
-        initialValue: false, // Don't pre-fill any value
-        autoClose: true, // Close calendar after selecting a date
-        observer: true, // Observe changes to the input field
+        format: 'YYYY/MM/DD',
+        calendarType: 'persian',
+        initialValue: false,
+        autoClose: true,
+        observer: true,
         navigator: {
             scroll: {
-                enabled: false // Disable scrolling in the calendar
+                enabled: false
             }
         }
     });
-
-    console.log(typeof $().persianDatepicker); // Ensure it is initialized
 });
 </script>
 
