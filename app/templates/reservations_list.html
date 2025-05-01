@@ -130,6 +130,9 @@ a:hover {
 
 <h3>جستجو</h3>
 
+<!-- Wrap everything LTR -->
+<div dir="ltr" style="text-align: right;">
+
 <form method="get" action="{{ url_for('admin.view_reservations') }}" class="search-form">
     <input type="text" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}">
 
@@ -176,10 +179,10 @@ a:hover {
                     بدون عکس
                 {% endif %}
             </td>
-            <td data-label="Turn Date">{{ reservation.user_explanation or 'در انتظار' }}</td>
+            <td data-label="User Explanation" required dir="rtl">{{ reservation.user_explanation or 'در انتظار' }}</td>
             <td data-label="Turn Date">{{ reservation.turn_date_persian or 'در انتظار' }}</td>
             <td data-label="Turn Hour">{{ reservation.turn_hour or 'در انتظار' }}</td>
-            <td data-label="Turn Explanation">{{ reservation.turn_explanation or 'در انتظار' }}</td>
+            <td data-label="Turn Explanation" required dir="rtl">{{ reservation.turn_explanation or 'در انتظار' }}</td>
             <td data-label="Assign Turn" colspan="2">
                 <form action="{{ url_for('admin.assign_turn', req_id=reservation.id) }}" method="POST" class="assign-form">
                     <input type="text" name="turn_date" class="persian-datepicker" placeholder="تاریخ" required autocomplete="off">
@@ -192,6 +195,8 @@ a:hover {
         {% endfor %}
     </tbody>
 </table>
+
+</div> <!-- End LTR wrapper -->
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
