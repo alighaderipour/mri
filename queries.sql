@@ -37,12 +37,13 @@ CREATE TABLE mri_requests (
     patient_phone_number NVARCHAR(11) COLLATE Arabic_100_CI_AI_SC_UTF8 NOT NULL,
     patient_insurance_name NVARCHAR(20) COLLATE Arabic_100_CI_AI_SC_UTF8 NOT NULL,
     tracking_code NVARCHAR(6) COLLATE Arabic_100_CI_AI_SC_UTF8 NOT NULL,
-    explanation NVARCHAR(100) COLLATE Arabic_100_CI_AI_SC_UTF8 NOT NULL,
+    user_explanation NVARCHAR(100) COLLATE Arabic_100_CI_AI_SC_UTF8  NULL,
 	has_requested_site bit default 0,
     submitted_date DATE NOT NULL DEFAULT CAST(GETDATE() AS DATE),
     submitted_hour TIME NOT NULL DEFAULT CAST(GETDATE() AS TIME),
     turn_date DATE NULL,
     turn_hour TIME NULL,
+	turn_explanation nvarchar(max) null,
     insurance_number bit,
     uploaded_image_path nvarchar(max) null
 );

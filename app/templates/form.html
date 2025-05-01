@@ -71,7 +71,7 @@
                     {% for insurance in insurances %}
                         <option value="{{ insurance.name }}"
                                 data-image-required="{{ 1 if insurance.image_required else 0 }}"
-                                {% if insurance.name == 'ساير' %}selected{% endif %}>
+                                {% if insurance.name =='ساير' %}selected{% endif %}>
                             {{ insurance.name }}
                         </option>
                     {% endfor %}
@@ -105,7 +105,7 @@
 
             <div class="col-md-12">
                 <label class="form-label">توضيحات</label>
-                <input type="text" class="form-control" name="explanation" required>
+                <input type="text" class="form-control" name="user_explanation" >
             </div>
 
             <div class="col-12 mt-4">

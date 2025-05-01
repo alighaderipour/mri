@@ -100,7 +100,7 @@ def reserve():
             patient_phone_number=data['patient_phone_number'],
             patient_insurance_name=data['patient_insurance_name'],
             tracking_code=data['tracking_code'],
-            explanation=data['explanation'],
+            user_explanation=data['user_explanation'],
             uploaded_image_path=image_path,
             has_requested_site=has_requested_site
         )

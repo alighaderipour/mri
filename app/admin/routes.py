@@ -117,7 +117,7 @@ def create_user():
         phone_number = request.form['phone_number']
         is_admin = 'is_admin' in request.form
         can_assign_turn = 'can_assign_turn' in request.form
-        is_active = 'is_active' in request.form
+        is_active = request.form.get('is_active') == '1'
 
         if User.query.filter_by(username=username).first():
             flash('Username already exists.')

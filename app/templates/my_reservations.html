@@ -117,7 +117,8 @@
             <th>ثبت نام در سایت</th>
             <th>تاريخ نوبت</th>
             <th>ساعت نوبت</th>
-            <th>توضيحات</th>
+            <th>توضيحات من</th>
+            <th>توضيحات نوبت دهنده</th>
             <th>حذف</th> <!-- New Column for Actions -->
         </tr>
     </thead>
@@ -140,7 +141,8 @@
 
             <td>{{ reservation.turn_date_persian or 'در انتظار' }}</td>
             <td>{{ reservation.turn_hour or 'در انتظار' }}</td>
-            <td>{{ reservation.turn_explanation   }}</td>
+            <td>{{ reservation.user_explanation }}</td>
+            <td>{{ reservation.turn_explanation or 'در انتظار'   }}</td>
             <td>
                 <!-- Delete Button -->
                 <form action="{{ url_for('main.delete_reservation', reservation_id=reservation.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('آيا از حذف درخواست خود اطمينان داريد؟');">

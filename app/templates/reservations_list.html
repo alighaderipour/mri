@@ -154,9 +154,10 @@ a:hover {
             <th>کد رهگیری</th>
             <th>ثبت نام در سایت</th>
             <th>عکس</th>
+            <th>توضيحات كاربر</th>
             <th>تاریخ نوبت</th>
             <th>ساعت نوبت</th>
-            <th>توضيحات</th>
+            <th>توضيحات اپراتور</th>
             <th>ثبت نوبت</th>
         </tr>
     </thead>
@@ -175,9 +176,10 @@ a:hover {
                     بدون عکس
                 {% endif %}
             </td>
+            <td data-label="Turn Date">{{ reservation.user_explanation or 'در انتظار' }}</td>
             <td data-label="Turn Date">{{ reservation.turn_date_persian or 'در انتظار' }}</td>
-            <td data-label="Turn Hour">{{ reservation.turn_hour or '' }}</td>
-            <td data-label="Turn Explanation">{{ reservation.turn_explanation or 'توضيحات' }}</td>
+            <td data-label="Turn Hour">{{ reservation.turn_hour or 'در انتظار' }}</td>
+            <td data-label="Turn Explanation">{{ reservation.turn_explanation or 'در انتظار' }}</td>
             <td data-label="Assign Turn" colspan="2">
                 <form action="{{ url_for('admin.assign_turn', req_id=reservation.id) }}" method="POST" class="assign-form">
                     <input type="text" name="turn_date" class="persian-datepicker" placeholder="تاریخ" required autocomplete="off">
