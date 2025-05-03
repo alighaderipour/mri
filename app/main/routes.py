@@ -39,7 +39,7 @@ def reserve():
         # ✅ CHECK: One request per day per applicant
         max_daily_per_user = pref.max_user_reserve_day
         daily_user_count = MRIRequest.query.filter_by(
-            applicant_national_id=data['applicant_national_id'],
+            user_id=current_user.id,
             reservation_date=today_gregorian
         ).count()
 
