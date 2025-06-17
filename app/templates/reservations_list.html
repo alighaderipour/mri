@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+
+{% block title %}درخواست ها{% endblock %}
+
+{% block content %}
+
+<!-- jQuery -->
+<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+
+<!-- Persian Date -->
+<script src="{{ url_for('static', filename='js/persian-date.min.js') }}"></script>
+
+<!-- Persian Datepicker CSS & JS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/persian-datepicker.min.css') }}">
+
+<script src="{{ url_for('static', filename='js/persian-datepicker.min.js') }}"></script>
+
+<!-- Flatpickr (Timepicker) -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/flatpickr.min.css') }}">
+
+<script src="{{ url_for('static', filename='js/flatpickr.min.js') }}"></script>
+
+<!-- Styles -->
+<style>
+    form.search-form {
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+    form.search-form input[type="text"],
+    form.search-form select {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        min-width: 180px;
+    }
+    form.search-form button {
+        background-color: #4CAF50;
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    form.search-form button:hover {
+        background-color: #45a049;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    thead {
+        background-color: #f2f2f2;
+    }
+    thead th {
+        padding: 12px;
+        text-align: left;
+        font-weight: bold;
+        border-bottom: 2px solid #ddd;
+    }
+    tbody td {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+    }
+    tbody tr:hover {
+        background-color: #f9f9f9;
+    }
+    td form.assign-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    td form.assign-form input[type="text"] {
+        width: 100px;
+        padding: 6px;
+    }
+    td form.assign-form button {
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+    h3 {
+        color: #333;
+        margin-bottom: 10px;
+    }
+    a {
+        color: #007bff;
+        text-decoration: none;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+    @media (max-width: 768px) {
+        table, thead, tbody, th, td, tr {
+            display: block;
+        }
+        thead {
+            display: none;
+        }
+        tbody td {
+            position: relative;
+            padding-left: 50%;
+            text-align: right;
+        }
+        tbody td::before {
+            position: absolute;
+            left: 15px;
+            width: 45%;
+            padding-right: 10px;
+            white-space: nowrap;
+            content: attr(data-label);
+            text-align: left;
+            font-weight: bold;
+        }
+        td form.assign-form {
+            flex-direction: column;
+        }
+        td form.assign-form textarea {
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            resize: vertical;
+        }
+    }
+    .turn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.turn-group select {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #fff;
+}
+
+.suggestions {
+    display: none;
+    background-color: #f9f9f9;
+    border: 1px dashed #ccc;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.suggestions label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+textarea.turn-explanation {
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    resize: vertical;
+    min-width: 250px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+.checkbox-rtl {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+textarea.turn-explanation {
+    direction: rtl;
+    text-align: right;
+    unicode-bidi: plaintext; /* This makes mixed RTL/LTR text behave naturally */
+}
+</style>
+
+<h3>جستجو</h3>
+
+<!-- Wrap everything LTR -->
+<div dir="ltr" style="text-align: right;">
+
+    <form method="get" action="{{ url_for('admin.view_reservations') }}" class="search-form">
+        <input type="text" name="q" placeholder="Search..." value="{{ request.args.get('q', '') }}">
+
+        <input type="text" name="from_date" id="from_date" class="persian-datepicker" placeholder="از تاریخ"
+               value="{{ request.args.get('from_date', '') }}">
+        <input type="text" name="to_date" id="to_date" class="persian-datepicker" placeholder="تا تاریخ"
+               value="{{ request.args.get('to_date', '') }}">
+
+        <select name="filter">
+            <option value="">همه</option>
+            <option value="assigned" {% if request.args.get(
+            'filter') == 'assigned' %}selected{% endif %}>با نوبت</option>
+            <option value="unassigned" {% if request.args.get(
+            'filter') == 'unassigned' %}selected{% endif %}>بدون نوبت</option>
+        </select>
+
+        <button type="submit">اعمال</button>
+    </form>
+
+    <table>
+        <thead>
+        <tr>
+            <th>تاریخ ثبت</th>
+            <th>نام همکار</th>
+            <th>نام مراجعه کننده</th>
+            <th>کد رهگیری</th>
+            <th>ثبت نام در سایت</th>
+            <th>عکس</th>
+            <th>توضيحات كاربر</th>
+            <th>تاریخ نوبت</th>
+            <th>ساعت نوبت</th>
+            <th>توضيحات اپراتور</th>
+            <th>ثبت نوبت</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for reservation in reservations %}
+        <tr>
+            <td data-label="Reservation Date">{{ reservation.reservation_date_persian }}</td>
+            <td data-label="Applicant Name">{{ reservation.application_first_name }} {{
+                reservation.application_last_name }}
+            </td>
+            <td data-label="Patient Name">{{ reservation.patient_name }}</td>
+            <td data-label="Tracking Code">{{ reservation.tracking_code }}</td>
+            <td>{{ "بله" if reservation.has_requested_site else "خیر" }}</td>
+            <td data-label="Image">
+                {% if reservation.uploaded_image_path %}
+                <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}"
+                   target="_blank">عکس</a>
+                {% else %}
+                بدون عکس
+                {% endif %}
+            </td>
+            <td data-label="User Explanation" required dir="rtl">{{ reservation.user_explanation or 'در انتظار' }}</td>
+            <td data-label="Turn Date">{{ reservation.turn_date_persian or 'در انتظار' }}</td>
+            <td data-label="Turn Hour">{{ reservation.turn_hour or 'در انتظار' }}</td>
+            <td data-label="Turn Explanation" required dir="rtl">{{ reservation.turn_explanation or 'در انتظار' }}</td>
+            <td data-label="Assign Turn" colspan="2">
+                <form action="{{ url_for('admin.assign_turn', req_id=reservation.id) }}" method="POST"
+                      class="assign-form">
+                    <input type="text" name="turn_date" class="persian-datepicker" placeholder="تاریخ" required
+                           autocomplete="off">
+                    <input type="text" name="turn_hour" class="timepicker" placeholder="ساعت" required>
+                    <div class="turn-group">
+                        <select  name="approval_type" class="approval-type"  required>
+                            <option value="">وضعیت را انتخاب کنید</option>
+                            <option value="approved">تایید</option>
+                            <option value="not_approved">رد</option>
+                        </select>
+
+                        <div class="suggestions approved-options">
+                            <label class="checkbox-rtl">
+                                <span>با تزریق</span>
+                                <input type="checkbox" value="براي انجام MRI با تزريق آزمايش اوره و كراتينين الزاميست">
+                            </label>
+
+                            <label class="checkbox-rtl">
+                                <span>ارایه مدارک</span>
+                                <input type="checkbox" value="به همراه داشتن مدارك پزشكي از قبيل كپي سونوگرافي ، آزمايشات ، پاتولوژي و عكس هاي قبلي الزاميست">
+                            </label>
+                            <label class="checkbox-rtl">
+                                <span>خود داری از خوردن و آشامیدن برای هشت ساعت</span>
+                                <input type="checkbox" value="8 ساعت قبل از انجام MRI از خوردن و آشامیدن خودداری نمایید">
+                            </label>
+                             <label class="checkbox-rtl">
+                                <span>نخوردن غذای چرب</span>
+                                <input type="checkbox" value="12 ساعت قبل از انجام MRI از خوردن و آشاميدن خودداري فرماييد (مخصوصا غذاهاي چرب) و در صورت استفاده از سرم 6 ساعت قبل استفاده نشود">
+                            </label>
+                             <label class="checkbox-rtl">
+                                <span>خود داری از خوردن و آشامیدن برای دو ساعت</span>
+                                <input type="checkbox" value="2 ساعت قبل از انجام MRI از خوردن و آشامیدن خودداری نمایید">
+                            </label>
+                        </div>
+
+                        <div class="suggestions not-approved-options">
+    <label class="checkbox-rtl">
+        <span>اشتباه بودن كد ملی</span>
+        <input type="checkbox" value="کد ملی اشتباه است">
+    </label>
+    <label class="checkbox-rtl">
+        <span>اشتباه بودن كد رهگیری</span>
+        <input type="checkbox" value="کد رهگیری اشتباه است">
+    </label>
+    <label class="checkbox-rtl">
+        <span>عدم ثبت درخواست در سایت بیمه توسط پزشك</span>
+        <input type="checkbox" value="عدم ثبت درخواست در سایت بیمه توسط پزشك">
+    </label>
+    <label class="checkbox-rtl">
+        <span>عدم انجام در مرکز</span>
+        <input type="checkbox" value="عدم انجام این درخواست در این مركز">
+    </label>
+    <label class="checkbox-rtl">
+        <span>نداشتن نوبت</span>
+        <input type="checkbox" value="نداشتن نوبت">
+    </label>
+    <label class="checkbox-rtl">
+        <span>پر شدن نوبت</span>
+        <input type="checkbox" value="به دليل پر شدن نوبت هاي اين ماه لطفا اول ماه آينده در خواست خود را ثبت نماييد">
+    </label>
+    <label class="checkbox-rtl">
+        <span>مراجعه حضوری</span>
+        <input type="checkbox" value="نوع درخواست ثبت شده MRI نمی باشد، لطفا حضوری مراجعه نمایید">
+    </label>
+    <label class="checkbox-rtl">
+        <span>اطلاع ثانوی</span>
+        <input type="checkbox" value="با عرض پوزش، به علت نقص فنی دستگاه، تا اطلاع ثانوی از ارائه نوبت معذوریم">
+    </label>
+</div>
+
+
+                        <textarea name="turn_explanation" class="turn-explanation" placeholder="توضیحات" rows="2"
+                                  required></textarea>
+                    </div>
+
+
+                    <button type="submit">نوبت دهی</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div> <!-- End LTR wrapper -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Time picker
+        flatpickr(".timepicker", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true
+        });
+
+        // Persian datepicker
+        $('.persian-datepicker').persianDatepicker({
+            format: 'YYYY/MM/DD',
+            calendarType: 'persian',
+            initialValue: false,
+            autoClose: true,
+            observer: true,
+            navigator: {
+                scroll: {
+                    enabled: false
+                }
+            }
+        });
+
+        // Show/hide options based on dropdown selection and update required attributes
+        document.querySelectorAll('.approval-type').forEach(function (dropdown) {
+            dropdown.addEventListener('change', function () {
+                const parent = dropdown.closest('form');
+                const approvedOptions = parent.querySelector('.approved-options');
+                const notApprovedOptions = parent.querySelector('.not-approved-options');
+                const turnDate = parent.querySelector('input[name="turn_date"]');
+                const turnHour = parent.querySelector('input[name="turn_hour"]');
+
+                if (this.value === 'approved') {
+                    approvedOptions.style.display = 'block';
+                    notApprovedOptions.style.display = 'none';
+                    turnDate?.setAttribute('required', 'required');
+                    turnHour?.setAttribute('required', 'required');
+                } else if (this.value === 'not_approved') {
+                    approvedOptions.style.display = 'none';
+                    notApprovedOptions.style.display = 'block';
+                    turnDate?.removeAttribute('required');
+                    turnHour?.removeAttribute('required');
+                } else {
+                    approvedOptions.style.display = 'none';
+                    notApprovedOptions.style.display = 'none';
+                    turnDate?.removeAttribute('required');
+                    turnHour?.removeAttribute('required');
+                }
+            });
+        });
+
+        // Append checkbox values to textarea
+        document.querySelectorAll('.suggestions input[type="checkbox"]').forEach(function (checkbox) {
+            checkbox.addEventListener('change', function () {
+                const form = this.closest('form');
+                const textarea = form.querySelector('.turn-explanation');
+                let selectedTexts = [];
+                form.querySelectorAll('.suggestions input[type="checkbox"]:checked').forEach(function (cb) {
+                    selectedTexts.push(cb.value);
+                });
+                textarea.value = selectedTexts.join('\n');
+            });
+        });
+    });
+</script>
+
+
+
+{% endblock %}

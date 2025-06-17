@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}داشبورد{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+
+    <h2 class="mb-4 text-center">داشبورد ادمین</h2>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>جستجو درخواست ها</strong>
+        </div>
+        <div class="card-body">
+            <form method="get" action="{{ url_for('admin.dashboard') }}" class="row g-3">
+
+                <div class="col-md-4">
+                    <label for="start_date" class="form-label">از تاریخ</label>
+                    <input type="text" class="form-control" name="start_date" id="start_date" value="{{ start_date or '' }}" placeholder="1403/02/10">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="end_date" class="form-label">تا تاریخ</label>
+                    <input type="text" class="form-control" name="end_date" id="end_date" value="{{ end_date or '' }}" placeholder="1403/02/20">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="applicant_name" class="form-label">نام همکار</label>
+                    <input type="text" class="form-control" name="applicant_name" id="applicant_name" value="{{ applicant_name or '' }}" placeholder="نام متقاضی">
+                </div>
+
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">فیلتر</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <strong>گزارش درخواست ها</strong>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>نام همکار</th>
+                        <th>تعداد درخواست</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for user in report_data %}
+                    <tr>
+                        <td>{{ user.first_name }} {{ user.last_name }}</td>
+                        <td>{{ user.reservation_count }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <strong>نمایش درخواست ها</strong>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-bordered table-striped table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>کد درخواست</th>
+                        <th>نام همکار</th>
+                        <th>نام مراجعه کننده</th>
+                        <th>کد رهگیری</th>
+                        <th>تاریخ ثبت</th>
+                        <th>تاریخ نوبت</th>
+                        <th>ساعت نوبت</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for reservation in reservations %}
+                    <tr>
+                        <td>{{ reservation.id }}</td>
+                        <td>{{ reservation.application_first_name }} {{ reservation.application_last_name }}</td>
+                        <td>{{ reservation.patient_name }}</td>
+                        <td>{{ reservation.tracking_code }}</td>
+                        <td>{{ reservation.reservation_date.strftime('%Y-%m-%d') if reservation.reservation_date else 'در انتظار' }}</td>
+                        <td>{{ reservation.turn_date.strftime('%Y-%m-%d') if reservation.turn_date else 'در انتظار' }}</td>
+                        <td>{{ reservation.turn_hour or 'در انتظار' }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

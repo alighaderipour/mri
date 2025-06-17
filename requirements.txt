@@ -1,0 +1,9 @@
+Flask
+Flask-SQLAlchemy
+Flask-Login
+pyodbc
+Werkzeug
+jdatetime
+persian
+wtforms
+flask_wtf

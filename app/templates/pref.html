@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}تنظیمات سیستم{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">تنظیمات سیستم ثبت درخواست MRI</h2>
+
+<form method="POST" enctype="multipart/form-data" class="row g-3">
+    <div class="col-md-6">
+        <label for="max_mri_reserve_day" class="form-label">حداکثر درخواست روزانه (کل کاربران)</label>
+        <input type="number" name="max_mri_reserve_day" id="max_mri_reserve_day"
+               class="form-control" value="{{ pref.max_mri_reserve_day }}" required>
+    </div>
+
+    <div class="col-md-6">
+        <label for="max_user_reserve_day" class="form-label">حداکثر درخواست روزانه برای هر کاربر</label>
+        <input type="number" name="max_user_reserve_day" id="max_user_reserve_day"
+               class="form-control" value="{{ pref.max_user_reserve_day }}" required>
+    </div>
+
+    <div class="col-md-6">
+        <label for="max_user_reserve_month" class="form-label">حداکثر درخواست ماهانه برای هر کاربر</label>
+        <input type="number" name="max_user_reserve_month" id="max_user_reserve_month"
+               class="form-control" value="{{ pref.max_user_reserve_month }}" required>
+    </div>
+    <div class="col-md-6">
+        <label for="logo" class="form-label">لوگوی سیستم (JPEG/PNG)</label>
+        <input type="file" name="logo" id="logo" class="form-control">
+    </div>
+
+    <div class="col-12 mt-3">
+        <button type="submit" class="btn btn-primary">ذخیره تنظیمات</button>
+    </div>
+</form>
+{% endblock %}

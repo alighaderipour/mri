@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>پروفایل کاربری</h2>
+    <form method="POST" action="{{ url_for('main.user_profile') }}">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            <label class="form-label">نام کاربری</label>
+            <input type="text" class="form-control" value="{{ current_user.username }}" readonly>
+        </div>
+
+
+        <div class="mb-3">
+            <label class="form-label" for="national_code">کد ملی</label>
+            {{ form.national_code(class="form-control", id="national_code", pattern="\d{10}", title="کد ملی باید ده رقم
+            عددی باشد", maxlength="10", minlength="10", inputmode="numeric") }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="phone_number">شماره تلفن</label>
+            {{ form.phone_number(class="form-control", id="phone_number", pattern="\d{11}", title="شماره تلفن بايد 11
+            رقمي باشد", maxlength="11", minlength="11", inputmode="numeric") }}
+        </div>
+
+
+        <hr>
+
+        <h4>تغییر رمز عبور</h4>
+
+        <div class="mb-3">
+            <label class="form-label" for="current_password">رمز عبور در حال استفاده</label>
+            {{ form.current_password(class="form-control") }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="new_password">رمز عبور جدید</label>
+            {{ form.new_password(class="form-control") }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="confirm_new_password">تکرار رمز عبور جدید</label>
+            {{ form.confirm_new_password(class="form-control") }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">به روز رسانی</button>
+    </form>
+</div>
+{% endblock %}

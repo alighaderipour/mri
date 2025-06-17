@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}درخواست جديد{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2 class="mb-4">ثبت درخواست جديد</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} text-center fw-bold" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+
+
+        <form method="post" enctype="multipart/form-data" id="reservationForm" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">تاريخ ثبت درخواست</label>
+                <input type="text" class="form-control" name="reservation_date" value="{{ today }}" readonly>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">كد ملي همكار</label>
+                <input type="text" class="form-control" name="applicant_national_id" value="{{ user.national_code }}"
+                       readonly>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">نام همكار</label>
+                <input type="text" class="form-control" name="application_first_name" value="{{ user.first_name }}"
+                       readonly>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">نام خانوادگي همكار</label>
+                <input type="text" class="form-control" name="application_last_name" value="{{ user.last_name }}"
+                       readonly>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">شماره تلفن همكار</label>
+                <input type="text" class="form-control" name="application_phone_number" value="{{ user.phone_number }}"
+                       readonly>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">بخش</label>
+                <input type="text" class="form-control" name="application_section" value="{{ section_name }}" readonly>
+            </div>
+
+            <hr class="mt-4">
+
+            <div class="col-md-6">
+                <label class="form-label">نام و نام خانوادگي مراجعه كننده</label>
+                <input type="text" class="form-control" name="patient_name" required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">شماره همراه مراجعه كننده</label>
+                <input type="text" class="form-control" name="patient_phone_number"
+                       pattern="^09\d{9}$" title="شماره موبايل خود را وارد كنيد مثلا 75*****0913 "
+                       maxlength="11" minlength="11" inputmode="numeric" required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">بيمه مراجعه كننده</label>
+                <select class="form-select" name="patient_insurance_name" id="insuranceSelect" required>
+                    {% for insurance in insurances %}
+                        <option value="{{ insurance.name }}"
+                                data-image-required="{{ 1 if insurance.image_required else 0 }}"
+                                {% if insurance.name =='ساير' %}selected{% endif %}>
+                            {{ insurance.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-6" id="imageUploadDiv" style="display: none;">
+                <label class="form-label">ارسال عكس </label>
+                <input type="file" class="form-control" name="uploaded_image" id="uploadedImageInput" accept="image/*">
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">كد رهگيري</label>
+                <input type="text" class="form-control" name="tracking_code"
+                       pattern="^\d{4,6}$" title="كد رهگيري معمولا پنچ رقمي است"
+                       maxlength="6" minlength="4" inputmode="numeric" required>
+            </div>
+           <div class="col-md-6">
+    <label class="form-label">آیا در سایت درخواستی ثبت کرده‌اید؟</label><br>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="has_requested_site" id="hasRequestedYes" value="1" required>
+        <label class="form-check-label" for="hasRequestedYes">بله</label>
+    </div>
+    <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="has_requested_site" id="hasRequestedNo" value="0">
+        <label class="form-check-label" for="hasRequestedNo">خیر</label>
+    </div>
+</div>
+
+
+
+            <div class="col-md-12">
+                <label class="form-label">توضيحات</label>
+                <input type="text" class="form-control" name="user_explanation" >
+            </div>
+
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-primary">ثبت درخواست</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // JavaScript to show/hide image upload field
+        document.addEventListener('DOMContentLoaded', function () {
+            const insuranceSelect = document.getElementById('insuranceSelect');
+            const imageUploadDiv = document.getElementById('imageUploadDiv');
+            const uploadedImageInput = document.getElementById('uploadedImageInput');
+
+            function toggleImageUpload() {
+                const selectedOption = insuranceSelect.options[insuranceSelect.selectedIndex];
+                const imageRequired = selectedOption.getAttribute('data-image-required');
+
+                if (imageRequired === '1') {
+                    imageUploadDiv.style.display = 'block';
+                    uploadedImageInput.required = true;
+                } else {
+                    imageUploadDiv.style.display = 'none';
+                    uploadedImageInput.required = false;
+                    uploadedImageInput.value = ""; // clear any selected file
+                }
+            }
+
+            toggleImageUpload(); // Initial check
+
+            insuranceSelect.addEventListener('change', toggleImageUpload);
+        });
+    </script>
+{% endblock %}

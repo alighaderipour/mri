@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود به سیستم</title>
+
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.rtl.min.css') }}">
+
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .login-container {
+            margin-top: 5rem;
+            max-width: 400px;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container d-flex justify-content-center">
+    <div class="login-container">
+        <h2 class="text-center mb-4">ورود به حساب</h2>
+        <form method="POST" action="/login">
+            <!-- Remove form.hidden_tag() if not using Flask-WTF -->
+
+            <div class="mb-3">
+                <label for="username" class="form-label">نام کاربری</label>
+                <input type="text" class="form-control" id="username" name="username" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">رمز عبور</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">ورود</button>
+            </div>
+
+            {% if error %}
+                <div class="alert alert-danger mt-3" role="alert">
+                    {{ error }}
+                </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+{% if pref is defined and pref.logo_path %}
+    <div class="text-center my-4">
+        <img src="{{ url_for('static', filename=pref.logo_path) }}" class="img-fluid" style="max-height: 100px;" alt="Logo">
+    </div>
+{% endif %}
+
+
+<!-- Bootstrap JS -->
+
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

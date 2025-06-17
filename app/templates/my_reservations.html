@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}درخواست هاي من{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    h2 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    form {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    form label {
+        font-weight: bold;
+        margin-right: 5px;
+    }
+
+    form input[type="text"],
+    form select {
+        padding: 8px;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        min-width: 200px;
+    }
+
+    form button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    form button:hover {
+        background-color: #2980b9;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background-color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    table thead {
+        background-color: #3498db;
+        color: white;
+    }
+
+    table th, table td {
+        text-align: center;
+        padding: 12px;
+        border: 1px solid #ddd;
+    }
+
+    table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    a {
+        color: #3498db;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<h2>درخواست های من</h2>
+
+<!-- Filter Section -->
+<form method="get" action="{{ url_for('main.my_reservations') }}">
+    <div>
+        <label for="reservation_date">تاريخ درخواست:</label>
+        <input type="text" id="reservation_date" name="reservation_date" value="{{ request.args.get('reservation_date', '') }}" placeholder="مثلا 1403/02/09">
+    </div>
+
+    <div>
+        <label for="turn_assigned">تاريخ نوبت</label>
+        <select id="turn_assigned" name="turn_assigned">
+            <option value="">همه</option>
+            <option value="yes" {% if request.args.get('turn_assigned') == 'yes' %}selected{% endif %}>با نوبت</option>
+            <option value="no" {% if request.args.get('turn_assigned') == 'no' %}selected{% endif %}>بدون نوبت</option>
+        </select>
+    </div>
+
+    <button type="submit">فيلتر</button>
+</form>
+
+<!-- Reservation Table -->
+<table>
+    <thead>
+        <tr>
+            <th>تاريخ ثبت</th>
+            <th>نام و نام خانوادگي بيمار</th>
+            <th>كد رهگيري</th>
+            <th>عكس</th>
+            <th>ثبت نام در سایت</th>
+            <th>تاريخ نوبت</th>
+            <th>ساعت نوبت</th>
+            <th>توضيحات من</th>
+            <th>توضيحات نوبت دهنده</th>
+            <th>حذف</th> <!-- New Column for Actions -->
+        </tr>
+    </thead>
+    <tbody>
+    {% for reservation in reservations %}
+        <tr>
+            <td>{{ reservation.reservation_date_persian or 'N/A' }}</td>
+            <td>{{ reservation.patient_name }}</td>
+            <td>{{ reservation.tracking_code }}</td>
+            <td>
+                {% if reservation.uploaded_image_path %}
+                    <a href="{{ url_for('main.serve_image', filename=reservation.uploaded_image_path.split('/')[-1]) }}" target="_blank">View Image</a>
+                {% else %}
+                    بدون عكس
+                {% endif %}
+            </td>
+            <td>
+                {{ "بله" if reservation.has_requested_site else "خیر" }}
+            </td>
+
+            <td>{{ reservation.turn_date_persian or 'در انتظار' }}</td>
+            <td>{{ reservation.turn_hour or 'در انتظار' }}</td>
+            <td>{{ reservation.user_explanation }}</td>
+            <td>
+  <div style="direction: rtl; text-align: right;">
+    {{ reservation.turn_explanation or 'در انتظار' }}
+  </div>
+</td>
+            <td>
+                <!-- Delete Button -->
+                <form action="{{ url_for('main.delete_reservation', reservation_id=reservation.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('آيا از حذف درخواست خود اطمينان داريد؟');">
+                    <button type="submit" class="btn btn-danger">حذف</button>
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

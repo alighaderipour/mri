@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Create User{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card shadow-sm p-4">
+        <h2 class="text-center mb-4">ايجاد كابر جديد</h2>
+
+        <form method="post" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">نام كاربري</label>
+                <input type="text" name="username" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">كلمه عبور</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">كد ملي</label>
+                <input type="text" name="national_code" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">شماره تلفن</label>
+                <input type="text" name="phone_number" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">نام</label>
+                <input type="text" name="first_name" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">نام خانوادگي</label>
+                <input type="text" name="last_name" class="form-control" required>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">بخش</label>
+                <select name="section" class="form-select" required>
+                    <option value="">انتخاب</option>
+                    {% for sec in sections %}
+                        <option value="{{ sec.section_nr }}">{{ sec.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-12">
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin">
+                    <label class="form-check-label" for="is_admin">ادمين</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="can_assign_turn" id="can_assign_turn">
+                    <label class="form-check-label" for="can_assign_turn">نوبت دهنده</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" name="is_active" id="is_active" value="1" checked>
+                    <label class="form-check-label" for="is_active">فعال</label>
+                </div>
+            </div>
+
+            <div class="col-12 text-center mt-3">
+                <button type="submit" class="btn btn-primary">ثبت</button>
+            </div>
+        </form>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('admin.list_users') }}" class="btn btn-outline-secondary">⬅ بازگشت</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
